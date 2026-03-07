@@ -10,8 +10,4 @@
       <ProjectReference Include="..\SBC.Domain.Entities\SBC.Domain.Entities.csproj" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="Repositories\Interfaces\" />
-    </ItemGroup>
-
 </Project>

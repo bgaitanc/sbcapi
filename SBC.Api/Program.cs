@@ -8,7 +8,9 @@ using Microsoft.OpenApi;
 using SBC.Application.Services.Implementation;
 using SBC.Application.Services.Interfaces;
 using SBC.Domain.Entities.Identity;
+using SBC.Domain.Repositories.Interfaces;
 using SBC.Infrastructure.Database;
+using SBC.Infrastructure.Repositories.Implementation;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -70,6 +72,8 @@ builder.Services.AddAuthentication(options =>
     });
 
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IAccountRepository, AccountRepository>();
+builder.Services.AddScoped<IAccountService, AccountService>();
 
 builder.Services.AddCors(options =>
 {
