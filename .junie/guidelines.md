@@ -14,6 +14,7 @@
 
 ## Tech Stack
 - **Framework**: .NET 10
+- **Language**: C# 15
 - **ORM**: Entity Framework Core (SQL Server)
 - **Authentication**: JWT Bearer + ASP.NET Core Identity
 - **API Documentation**: Swagger/OpenAPI
@@ -21,7 +22,7 @@
 ## Development Guidelines
 
 ### 1. Code Style and Standards
-- Follow standard C# and .NET naming conventions (PascalCase for classes/methods, camelCase for local variables).
+- Follow standard C# 15 and .NET naming conventions (PascalCase for classes/methods, camelCase for local variables).
 - Maintain consistency with the existing codebase patterns.
 - Ensure that any new domain entities or database changes are followed by creating an EF Core migration in `SBC.Infrastructure`.
 
@@ -40,3 +41,6 @@
 ### 5. Git Commits
 - Only commit when explicitly requested.
 - Use descriptive commit messages and always include Junie as a co-author: `--trailer "Co-authored-by: Junie <junie@jetbrains.com>"`
+
+### 6. API Client Testing (SBC.Api.http)
+- Whenever a new controller or endpoint is added, update the `SBC.Api\SBC.Api.http` file with its corresponding request example.

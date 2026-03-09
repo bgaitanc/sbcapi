@@ -41,4 +41,14 @@ public class JournalEntryRepository(SbcDbContext context) : BaseRepository<Journ
             .Include(j => j.Lines)
             .FirstOrDefaultAsync(j => j.Id == id);
     }
+
+    public async Task<IEnumerable<JournalEntry>> GetByDateRangeWithLinesAsync(DateTime startDate, DateTime endDate)
+    {
+        return await _dbSet
+            .Include(j => j.Lines)
+                .ThenInclude(l => l.Account)
+            .Where(j => j.Date >= startDate && j.Date <= endDate && j.IsPosted)
+            .OrderBy(j => j.Date)
+            .ToListAsync();
+    }
 }

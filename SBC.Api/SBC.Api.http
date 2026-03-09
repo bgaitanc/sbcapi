@@ -204,3 +204,9 @@ DELETE {{SBC_HostAddress}}/api/journalEntryLines/{{journalEntryLineId}}
 Authorization: Bearer {{auth_token}}
 
 ###
+
+# @name api/reports/getIncomeStatement
+GET {{SBC_HostAddress}}/api/reports/income-statement?startDate=2024-01-01&endDate=2024-12-31
+Authorization: Bearer {{auth_token}}
+
+###
