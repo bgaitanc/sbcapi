@@ -91,3 +91,70 @@ DELETE {{SBC_HostAddress}}/api/accounts/{{accountId}}
 Authorization: Bearer {{auth_token}}
 
 ###
+
+# @name api/journalEntries/getAll
+GET {{SBC_HostAddress}}/api/journalEntries
+Authorization: Bearer {{auth_token}}
+
+###
+
+# @name api/journalEntries/getById
+@journalEntryId = 00000000-0000-0000-0000-000000000000
+GET {{SBC_HostAddress}}/api/journalEntries/{{journalEntryId}}
+Authorization: Bearer {{auth_token}}
+
+###
+
+# @name api/journalEntries/create
+POST {{SBC_HostAddress}}/api/journalEntries
+Authorization: Bearer {{auth_token}}
+Content-Type: application/json
+
+{
+  "date": "2026-03-09T00:00:00Z",
+  "description": "Apertura de caja inicial",
+  "lines": [
+    {
+      "accountId": "00000000-0000-0000-0000-000000000000",
+      "debit": 1000.0,
+      "credit": 0.0
+    },
+    {
+      "accountId": "00000000-0000-0000-0000-000000000001",
+      "debit": 0.0,
+      "credit": 1000.0
+    }
+  ]
+}
+
+###
+
+# @name api/journalEntries/update
+PUT {{SBC_HostAddress}}/api/journalEntries/{{journalEntryId}}
+Authorization: Bearer {{auth_token}}
+Content-Type: application/json
+
+{
+  "date": "2026-03-09T00:00:00Z",
+  "description": "Apertura de caja inicial - corregido",
+  "lines": [
+    {
+      "accountId": "00000000-0000-0000-0000-000000000000",
+      "debit": 1500.0,
+      "credit": 0.0
+    },
+    {
+      "accountId": "00000000-0000-0000-0000-000000000001",
+      "debit": 0.0,
+      "credit": 1500.0
+    }
+  ]
+}
+
+###
+
+# @name api/journalEntries/delete
+DELETE {{SBC_HostAddress}}/api/journalEntries/{{journalEntryId}}
+Authorization: Bearer {{auth_token}}
+
+###
