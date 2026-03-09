@@ -25,6 +25,7 @@
       <ProjectReference Include="..\SBC.Infrastructure\SBC.Infrastructure.csproj" />
       <ProjectReference Include="..\SBC.Domain.Entities\SBC.Domain.Entities.csproj" />
       <ProjectReference Include="..\SBC.Application.Models\SBC.Application.Models.csproj" />
+      <ProjectReference Include="..\SBC.Api\SBC.Api.csproj" />
     </ItemGroup>
 
 </Project>

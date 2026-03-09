@@ -6,7 +6,7 @@ using SBC.Domain.Entities.Accounting;
 using SBC.Domain.Entities.Enums;
 using SBC.Domain.Repositories.Interfaces;
 
-namespace SBC.UnitTest;
+namespace SBC.UnitTest.Services;
 
 public class AccountingPeriodServiceTests
 {
