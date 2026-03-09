@@ -210,3 +210,9 @@ GET {{SBC_HostAddress}}/api/reports/income-statement?startDate=2024-01-01&endDat
 Authorization: Bearer {{auth_token}}
 
 ###
+
+# @name api/reports/getBalanceSheet
+GET {{SBC_HostAddress}}/api/reports/balance-sheet?date=2024-12-31
+Authorization: Bearer {{auth_token}}
+
+###

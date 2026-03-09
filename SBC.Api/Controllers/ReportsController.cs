@@ -16,4 +16,10 @@ public class ReportsController(IFinancialReportService service) : SbcControllerB
     {
         return await ExecuteServiceAsync(() => service.GetIncomeStatementAsync(startDate, endDate));
     }
+
+    [HttpGet("balance-sheet")]
+    public async Task<ActionResult<BalanceSheetDto>> GetBalanceSheet([FromQuery] DateTime date)
+    {
+        return await ExecuteServiceAsync(() => service.GetBalanceSheetAsync(date));
+    }
 }

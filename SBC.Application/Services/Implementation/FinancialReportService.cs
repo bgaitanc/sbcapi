@@ -74,4 +74,77 @@ public class FinancialReportService(IJournalEntryRepository journalEntryReposito
 
         return report;
     }
+
+    public async Task<BalanceSheetDto> GetBalanceSheetAsync(DateTime date)
+    {
+        var entries = await journalEntryRepository.GetByDateRangeWithLinesAsync(DateTime.MinValue, date);
+        var allLines = entries.SelectMany(e => e.Lines).ToList();
+
+        var report = new BalanceSheetDto
+        {
+            Date = date
+        };
+
+        // Assets
+        var assetLines = allLines
+            .Where(l => l.Account.Type == AccountType.Asset)
+            .GroupBy(l => new { l.AccountId, l.Account.Code, l.Account.Name })
+            .Select(g => new BalanceSheetLineDto
+            {
+                AccountId = g.Key.AccountId,
+                AccountCode = g.Key.Code,
+                AccountName = g.Key.Name,
+                Amount = g.Sum(l => l.Debit - l.Credit)
+            })
+            .Where(l => l.Amount != 0)
+            .OrderBy(l => l.AccountCode)
+            .ToList();
+
+        report.Assets = assetLines;
+        report.TotalAssets = assetLines.Sum(a => a.Amount);
+
+        // Liabilities
+        var liabilityLines = allLines
+            .Where(l => l.Account.Type == AccountType.Liability)
+            .GroupBy(l => new { l.AccountId, l.Account.Code, l.Account.Name })
+            .Select(g => new BalanceSheetLineDto
+            {
+                AccountId = g.Key.AccountId,
+                AccountCode = g.Key.Code,
+                AccountName = g.Key.Name,
+                Amount = g.Sum(l => l.Credit - l.Debit)
+            })
+            .Where(l => l.Amount != 0)
+            .OrderBy(l => l.AccountCode)
+            .ToList();
+
+        report.Liabilities = liabilityLines;
+        report.TotalLiabilities = liabilityLines.Sum(l => l.Amount);
+
+        // Equity
+        var equityLines = allLines
+            .Where(l => l.Account.Type == AccountType.Equity)
+            .GroupBy(l => new { l.AccountId, l.Account.Code, l.Account.Name })
+            .Select(g => new BalanceSheetLineDto
+            {
+                AccountId = g.Key.AccountId,
+                AccountCode = g.Key.Code,
+                AccountName = g.Key.Name,
+                Amount = g.Sum(l => l.Credit - l.Debit)
+            })
+            .Where(l => l.Amount != 0)
+            .OrderBy(l => l.AccountCode)
+            .ToList();
+
+        report.Equity = equityLines;
+        report.TotalEquity = equityLines.Sum(e => e.Amount);
+
+        // Net Income (Historical)
+        var revenue = allLines.Where(l => l.Account.Type == AccountType.Revenue).Sum(l => l.Credit - l.Debit);
+        var costs = allLines.Where(l => l.Account.Type == AccountType.Cost).Sum(l => l.Debit - l.Credit);
+        var expenses = allLines.Where(l => l.Account.Type == AccountType.Expense).Sum(l => l.Debit - l.Credit);
+        report.NetIncome = revenue - costs - expenses;
+
+        return report;
+    }
 }
