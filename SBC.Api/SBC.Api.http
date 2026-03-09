@@ -158,3 +158,49 @@ DELETE {{SBC_HostAddress}}/api/journalEntries/{{journalEntryId}}
 Authorization: Bearer {{auth_token}}
 
 ###
+
+# @name api/journalEntryLines/getByJournalEntryId
+GET {{SBC_HostAddress}}/api/journalEntryLines/journal-entry/{{journalEntryId}}
+Authorization: Bearer {{auth_token}}
+
+###
+
+# @name api/journalEntryLines/getById
+@journalEntryLineId = 00000000-0000-0000-0000-000000000000
+GET {{SBC_HostAddress}}/api/journalEntryLines/{{journalEntryLineId}}
+Authorization: Bearer {{auth_token}}
+
+###
+
+# @name api/journalEntryLines/create
+POST {{SBC_HostAddress}}/api/journalEntryLines
+Authorization: Bearer {{auth_token}}
+Content-Type: application/json
+
+{
+  "journalEntryId": "{{journalEntryId}}",
+  "accountId": "00000000-0000-0000-0000-000000000000",
+  "debit": 500.0,
+  "credit": 0.0
+}
+
+###
+
+# @name api/journalEntryLines/update
+PUT {{SBC_HostAddress}}/api/journalEntryLines/{{journalEntryLineId}}
+Authorization: Bearer {{auth_token}}
+Content-Type: application/json
+
+{
+  "accountId": "00000000-0000-0000-0000-000000000000",
+  "debit": 600.0,
+  "credit": 0.0
+}
+
+###
+
+# @name api/journalEntryLines/delete
+DELETE {{SBC_HostAddress}}/api/journalEntryLines/{{journalEntryLineId}}
+Authorization: Bearer {{auth_token}}
+
+###
