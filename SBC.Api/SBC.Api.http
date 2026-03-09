@@ -216,3 +216,28 @@ GET {{SBC_HostAddress}}/api/reports/balance-sheet?date=2024-12-31
 Authorization: Bearer {{auth_token}}
 
 ###
+
+# @name api/accountingPeriods/getAll
+GET {{SBC_HostAddress}}/api/accountingPeriods
+Authorization: Bearer {{auth_token}}
+
+###
+
+# @name api/accountingPeriods/getByPeriod
+GET {{SBC_HostAddress}}/api/accountingPeriods/2026/03
+Authorization: Bearer {{auth_token}}
+
+###
+
+# @name api/accountingPeriods/close
+POST {{SBC_HostAddress}}/api/accountingPeriods/close
+Authorization: Bearer {{auth_token}}
+Content-Type: application/json
+
+{
+  "year": 2026,
+  "month": 3,
+  "equityAccountId": "00000000-0000-0000-0000-000000000000"
+}
+
+###

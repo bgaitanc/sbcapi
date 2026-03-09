@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SBC.Infrastructure.Database;
 
@@ -11,9 +12,11 @@ using SBC.Infrastructure.Database;
 namespace SBC.Infrastructure.Migrations
 {
     [DbContext(typeof(SbcDbContext))]
-    partial class SbcDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260309185626_AddAccountingPeriod")]
+    partial class AddAccountingPeriod
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -227,14 +230,14 @@ namespace SBC.Infrastructure.Migrations
             modelBuilder.Entity("SBC.Domain.Entities.Accounting.AccountingPeriod", b =>
                 {
                     b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime?>("ClosedAt")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("ClosedBy")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid?>("ClosingJournalEntryId")
                         .HasColumnType("uniqueidentifier");
@@ -243,40 +246,28 @@ namespace SBC.Infrastructure.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("CreatedBy")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("IsClosed")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(false);
+                        .HasColumnType("bit");
 
-                    b.Property<short>("Month")
-                        .HasColumnType("smallint");
+                    b.Property<int>("Month")
+                        .HasColumnType("int");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("UpdatedBy")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("nvarchar(max)");
 
-                    b.Property<short>("Year")
-                        .HasColumnType("smallint");
+                    b.Property<int>("Year")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
                     b.HasIndex("ClosingJournalEntryId");
 
-                    b.HasIndex("Year", "Month")
-                        .IsUnique();
-
-                    b.ToTable("AccountingPeriods", "accounting", t =>
-                        {
-                            t.HasCheckConstraint("CK_AccountingPeriods_Month_Valid", "[Month] >= 1 AND [Month] <= 12");
-
-                            t.HasCheckConstraint("CK_AccountingPeriods_Year_Valid", "[Year] >= 1900");
-                        });
+                    b.ToTable("AccountingPeriods");
                 });
 
             modelBuilder.Entity("SBC.Domain.Entities.Accounting.JournalEntry", b =>
@@ -536,8 +527,7 @@ namespace SBC.Infrastructure.Migrations
                 {
                     b.HasOne("SBC.Domain.Entities.Accounting.JournalEntry", "ClosingJournalEntry")
                         .WithMany()
-                        .HasForeignKey("ClosingJournalEntryId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .HasForeignKey("ClosingJournalEntryId");
 
                     b.Navigation("ClosingJournalEntry");
                 });

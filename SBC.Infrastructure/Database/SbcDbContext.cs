@@ -11,9 +11,10 @@ namespace SBC.Infrastructure.Database;
 public class SbcDbContext(DbContextOptions<SbcDbContext> options)
     : IdentityDbContext<ApplicationUser, IdentityRole<Guid>, Guid>(options)
 {
-    DbSet<Account> Accounts { get; set; }
-    DbSet<JournalEntry> JournalEntries { get; set; }
-    DbSet<JournalEntryLine> JournalEntryLines { get; set; }
+    public DbSet<Account> Accounts { get; set; }
+    public DbSet<JournalEntry> JournalEntries { get; set; }
+    public DbSet<JournalEntryLine> JournalEntryLines { get; set; }
+    public DbSet<AccountingPeriod> AccountingPeriods { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

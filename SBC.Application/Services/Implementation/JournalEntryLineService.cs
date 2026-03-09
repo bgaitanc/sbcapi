@@ -30,6 +30,7 @@ public class JournalEntryLineService(
 
         var line = new JournalEntryLine
         {
+            Id = Guid.NewGuid(),
             JournalEntryId = createDto.JournalEntryId,
             AccountId = createDto.AccountId,
             Debit = createDto.Debit,

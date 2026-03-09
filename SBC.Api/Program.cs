@@ -79,6 +79,8 @@ builder.Services.AddScoped<IJournalEntryService, JournalEntryService>();
 builder.Services.AddScoped<IJournalEntryLineRepository, JournalEntryLineRepository>();
 builder.Services.AddScoped<IJournalEntryLineService, JournalEntryLineService>();
 builder.Services.AddScoped<IFinancialReportService, FinancialReportService>();
+builder.Services.AddScoped<IAccountingPeriodRepository, AccountingPeriodRepository>();
+builder.Services.AddScoped<IAccountingPeriodService, AccountingPeriodService>();
 
 builder.Services.AddCors(options =>
 {

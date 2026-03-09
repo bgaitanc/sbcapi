@@ -24,6 +24,7 @@ public class JournalEntryService(IJournalEntryRepository repository) : IJournalE
     {
         var entry = new JournalEntry
         {
+            Id = Guid.NewGuid(),
             Date = createDto.Date,
             Day = createDto.Date.Day,
             Month = createDto.Date.Month,
@@ -31,6 +32,7 @@ public class JournalEntryService(IJournalEntryRepository repository) : IJournalE
             Description = createDto.Description,
             Lines = createDto.Lines.Select(l => new JournalEntryLine
             {
+                Id = Guid.NewGuid(),
                 AccountId = l.AccountId,
                 Debit = l.Debit,
                 Credit = l.Credit
@@ -66,6 +68,7 @@ public class JournalEntryService(IJournalEntryRepository repository) : IJournalE
         {
             entry.Lines.Add(new JournalEntryLine
             {
+                Id = Guid.NewGuid(),
                 JournalEntryId = id,
                 AccountId = lineDto.AccountId,
                 Debit = lineDto.Debit,
