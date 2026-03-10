@@ -18,7 +18,7 @@ public class AuthController(IAuthService authService) :  SbcControllerBase
     /// Registers a new user with the provided registration details.
     /// </summary>
     /// <param name="registerDto">
-    /// An object containing the user's email, password, first name, and last name.
+    /// An object containing the user's username, email, password, first name, and last name.
     /// </param>
     /// <returns>
     /// A <see cref="Task"/> encapsulating an <see cref="ActionResult{Guid}"/>.
@@ -40,7 +40,7 @@ public class AuthController(IAuthService authService) :  SbcControllerBase
     /// refresh token, and associated user details upon successful login.
     /// </summary>
     /// <param name="loginDto">
-    /// An object containing the user's email and password used for authentication.
+    /// An object containing the user's username and password used for authentication.
     /// </param>
     /// <returns>
     /// A <see cref="Task"/> encapsulating an <see cref="ActionResult{AuthResponseDto}"/>.

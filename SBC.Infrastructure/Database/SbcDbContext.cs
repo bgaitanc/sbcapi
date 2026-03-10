@@ -36,6 +36,7 @@ public class SbcDbContext(DbContextOptions<SbcDbContext> options)
         modelBuilder.Entity<IdentityUserToken<Guid>>().ToTable("UserTokens", "identity");
 
         RolSeeder.SeedRoles(modelBuilder);
+        UserSeeder.SeedUsers(modelBuilder);
         AccountSeeder.SeedAccounts(modelBuilder);
     }
 

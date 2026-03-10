@@ -22,7 +22,7 @@ public class AuthControllerTests
     public async Task Register_ShouldReturnCreated()
     {
         // Arrange
-        var registerDto = new RegisterDto("test@example.com", "Password123!", "John", "Doe");
+        var registerDto = new RegisterDto("testuser", "test@example.com", "Password123!", "John", "Doe");
         var userId = Guid.NewGuid();
         _serviceMock.Setup(s => s.RegisterUserAsync(registerDto)).ReturnsAsync(userId);
 
@@ -42,8 +42,9 @@ public class AuthControllerTests
     public async Task Login_ShouldReturnOk()
     {
         // Arrange
-        var loginDto = new LoginDto("test@example.com", "Password123!");
-        var authResponse = new AuthResponseDto(Guid.NewGuid(), loginDto.Email, "token", "refresh", new List<string> { "Guest" });
+        var loginDto = new LoginDto("testuser", "Password123!");
+        var authResponse = new AuthResponseDto(Guid.NewGuid(), "test", "test@example.com", "token", "refresh",
+            new List<string> { "Guest" });
         _serviceMock.Setup(s => s.LoginAsync(loginDto)).ReturnsAsync(authResponse);
 
         // Act
@@ -62,7 +63,8 @@ public class AuthControllerTests
     {
         // Arrange
         var request = new RefreshTokenRequestDto("old_token", "refresh_token");
-        var authResponse = new AuthResponseDto(Guid.NewGuid(), "test@example.com", "new_token", "new_refresh", new List<string> { "Guest" });
+        var authResponse = new AuthResponseDto(Guid.NewGuid(), "test", "test@example.com", "new_token", "new_refresh",
+            new List<string> { "Guest" });
         _serviceMock.Setup(s => s.RefreshTokenAsync(request)).ReturnsAsync(authResponse);
 
         // Act

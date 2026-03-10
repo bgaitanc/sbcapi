@@ -6,6 +6,7 @@ POST {{SBC_HostAddress}}/api/auth/register
 Content-Type: application/json
 
 {
+  "userName": "bgaitan2",
   "firstName": "Brian Antonio",
   "lastName": "Gaitán Corea",
   "email": "bgaitan2@test.com",
@@ -18,7 +19,7 @@ POST {{SBC_HostAddress}}/api/auth/login
 Content-Type: application/json
 
 {
-  "email": "bgaitan2@test.com",
+  "username": "bgaitan2",
   "password": "mortadela01"
 }
 

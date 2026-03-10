@@ -20,14 +20,19 @@ public class AuthService(
 {
     public async Task<Guid> RegisterUserAsync(RegisterDto registerDto)
     {
-        var userExists = await userManager.FindByEmailAsync(registerDto.Email);
-        if (userExists != null)
+        var emailExists = await userManager.FindByEmailAsync(registerDto.Email);
+        if (emailExists != null)
             throw new SbcException(HttpStatusCode.PreconditionFailed,
                 "El correo electrónico ya está registrado.");
 
+        var userNameExists = await userManager.FindByNameAsync(registerDto.UserName);
+        if (userNameExists != null)
+            throw new SbcException(HttpStatusCode.PreconditionFailed,
+                "El nombre de usuario ya está registrado.");
+
         var user = new ApplicationUser
         {
-            UserName = registerDto.Email,
+            UserName = registerDto.UserName,
             Email = registerDto.Email,
             FirstName = registerDto.FirstName,
             LastName = registerDto.LastName
@@ -48,7 +53,7 @@ public class AuthService(
 
     public async Task<AuthResponseDto> LoginAsync(LoginDto loginDto)
     {
-        var user = await userManager.FindByEmailAsync(loginDto.Email);
+        var user = await userManager.FindByNameAsync(loginDto.UserName);
 
         if (user == null || !await userManager.CheckPasswordAsync(user, loginDto.Password))
         {
@@ -63,6 +68,7 @@ public class AuthService(
         var roles = await userManager.GetRolesAsync(user);
 
         return new AuthResponseDto(
+            UserName: user.UserName!,
             UserId: user.Id,
             Email: user.Email!,
             Token: accessToken,
@@ -96,6 +102,7 @@ public class AuthService(
         var roles = await userManager.GetRolesAsync(user);
 
         return new AuthResponseDto(
+            UserName: user.UserName!,
             UserId: user.Id,
             Email: user.Email!,
             Token: newAccessToken,
@@ -121,6 +128,7 @@ public class AuthService(
         {
             new(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
             new(JwtRegisteredClaimNames.Email, user.Email!),
+            new(JwtRegisteredClaimNames.UniqueName, user.UserName!),
             new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
             new("FirstName", user.FirstName),
             new("LastName", user.LastName)
