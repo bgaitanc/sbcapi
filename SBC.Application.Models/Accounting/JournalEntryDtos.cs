@@ -69,3 +69,10 @@ public class UpdateJournalEntryLineForLineDto
     public decimal Debit { get; set; }
     public decimal Credit { get; set; }
 }
+
+public class BulkJournalEntryImportResultDto
+{
+    public int SuccessCount { get; set; }
+    public int ErrorCount { get; set; }
+    public List<string> Errors { get; set; } = new();
+}

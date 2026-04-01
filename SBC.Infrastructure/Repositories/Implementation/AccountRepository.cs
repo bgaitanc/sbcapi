@@ -28,6 +28,11 @@ public class AccountRepository(SbcDbContext context) : BaseRepository<Account>(c
         return await _dbSet.AnyAsync(a => a.Code == code);
     }
 
+    public async Task<Account?> GetByCodeAsync(string code)
+    {
+        return await _dbSet.FirstOrDefaultAsync(a => a.Code == code);
+    }
+
     public async Task<IEnumerable<Account>> GetRootsWithChildrenAsync()
     {
         // Para soportar N niveles, traemos todas las cuentas y construimos el árbol en memoria o usamos Includes profundos.

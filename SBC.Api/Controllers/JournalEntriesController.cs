@@ -48,4 +48,14 @@ public class JournalEntriesController(IJournalEntryService service) : SbcControl
     {
         return await ExecuteServiceAsync(() => service.DeleteAsync(id));
     }
+
+    [HttpPost("import")]
+    public async Task<ActionResult<BulkJournalEntryImportResultDto>> Import(IFormFile file)
+    {
+        if (file == null || file.Length == 0)
+            return BadRequest("No se ha proporcionado un archivo o el archivo está vacío.");
+
+        using var stream = file.OpenReadStream();
+        return await ExecuteServiceAsync(() => service.ImportFromExcelAsync(stream));
+    }
 }

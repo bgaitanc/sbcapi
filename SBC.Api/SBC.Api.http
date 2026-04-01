@@ -166,6 +166,20 @@ Authorization: Bearer {{auth_token}}
 
 ###
 
+# @name api/journalEntries/import
+POST {{SBC_HostAddress}}/api/journalEntries/import
+Authorization: Bearer {{auth_token}}
+Content-Type: multipart/form-data; boundary=WebAppBoundary
+
+--WebAppBoundary
+Content-Disposition: form-data; name="file"; filename="Asientos.xlsx"
+Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+
+< ./Asientos.xlsx
+--WebAppBoundary--
+
+###
+
 # @name api/journalEntryLines/getByJournalEntryId
 GET {{SBC_HostAddress}}/api/journalEntryLines/journal-entry/{{journalEntryId}}
 Authorization: Bearer {{auth_token}}
