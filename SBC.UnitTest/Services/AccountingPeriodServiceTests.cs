@@ -77,4 +77,36 @@ public class AccountingPeriodServiceTests
 
         _periodRepoMock.Verify(r => r.AddAsync(It.Is<AccountingPeriod>(p => p.IsClosed && p.Year == year && p.Month == month)), Times.Once);
     }
+
+    [Fact]
+    public async Task CreatePeriodAsync_WhenPeriodDoesNotExist_ShouldCreatePeriod()
+    {
+        // Arrange
+        int year = 2026;
+        int month = 2;
+        _periodRepoMock.Setup(r => r.GetByPeriodAsync(year, month)).ReturnsAsync((AccountingPeriod)null);
+        _periodRepoMock.Setup(r => r.AddAsync(It.IsAny<AccountingPeriod>()))
+            .ReturnsAsync((AccountingPeriod p) => p);
+
+        // Act
+        var result = await _service.CreatePeriodAsync(year, month);
+
+        // Assert
+        Assert.Equal(year, result.Year);
+        Assert.Equal(month, result.Month);
+        Assert.False(result.IsClosed);
+        _periodRepoMock.Verify(r => r.AddAsync(It.Is<AccountingPeriod>(p => p.Year == year && p.Month == month && !p.IsClosed)), Times.Once);
+    }
+
+    [Fact]
+    public async Task CreatePeriodAsync_WhenPeriodExists_ShouldThrowDomainException()
+    {
+        // Arrange
+        int year = 2026;
+        int month = 2;
+        _periodRepoMock.Setup(r => r.GetByPeriodAsync(year, month)).ReturnsAsync(new AccountingPeriod { Year = year, Month = month });
+
+        // Act & Assert
+        await Assert.ThrowsAsync<SBC.Domain.Exceptions.DomainException>(() => _service.CreatePeriodAsync(year, month));
+    }
 }

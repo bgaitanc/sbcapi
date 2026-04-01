@@ -28,6 +28,14 @@ public class AccountingPeriodsController(IAccountingPeriodService service) : Sbc
         });
     }
 
+    [HttpPost]
+    public async Task<ActionResult<AccountingPeriodDto>> Create([FromBody] CreateAccountingPeriodRequest request)
+    {
+        return await ExecuteServiceAsync(
+            () => service.CreatePeriodAsync(request.Year, request.Month),
+            HttpStatusCode.Created);
+    }
+
     [HttpPost("close")]
     public async Task<ActionResult<AccountingPeriodDto>> ClosePeriod([FromBody] ClosePeriodRequest request)
     {

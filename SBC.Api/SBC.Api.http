@@ -248,3 +248,15 @@ Content-Type: application/json
 }
 
 ###
+
+# @name api/accountingPeriods/create
+POST {{SBC_HostAddress}}/api/accountingPeriods
+Authorization: Bearer {{auth_token}}
+Content-Type: application/json
+
+{
+  "year": 2026,
+  "month": 4
+}
+
+###

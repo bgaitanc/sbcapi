@@ -73,4 +73,24 @@ public class AccountingPeriodsControllerTests
         Assert.True(response.Success);
         Assert.Equal(HttpStatusCode.Created, response.StatusCode);
     }
+
+    [Fact]
+    public async Task Create_ShouldReturnCreated()
+    {
+        // Arrange
+        var request = new CreateAccountingPeriodRequest { Year = 2026, Month = 2 };
+        var createdPeriod = new AccountingPeriodDto { Id = Guid.NewGuid(), Year = request.Year, Month = request.Month, IsClosed = false };
+        _serviceMock.Setup(s => s.CreatePeriodAsync(request.Year, request.Month)).ReturnsAsync(createdPeriod);
+
+        // Act
+        var result = await _controller.Create(request);
+
+        // Assert
+        var actionResult = Assert.IsType<ActionResult<AccountingPeriodDto>>(result);
+        var objectResult = Assert.IsType<CreatedResult>(actionResult.Result);
+        var response = Assert.IsType<SbcGenericResponse<AccountingPeriodDto>>(objectResult.Value);
+        Assert.True(response.Success);
+        Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+        Assert.Equal(createdPeriod, response.Data);
+    }
 }

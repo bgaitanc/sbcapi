@@ -17,3 +17,9 @@ public class ClosePeriodRequest
     public int Month { get; set; }
     public Guid EquityAccountId { get; set; }
 }
+
+public class CreateAccountingPeriodRequest
+{
+    public int Year { get; set; }
+    public int Month { get; set; }
+}

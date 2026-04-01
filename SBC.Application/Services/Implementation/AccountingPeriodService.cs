@@ -145,6 +145,26 @@ public class AccountingPeriodService(
         return period == null ? null : MapToDto(period);
     }
 
+    public async Task<AccountingPeriodDto> CreatePeriodAsync(int year, int month)
+    {
+        var existingPeriod = await periodRepository.GetByPeriodAsync(year, month);
+        if (existingPeriod != null)
+        {
+            throw new DomainException($"El período {month}/{year} ya existe.");
+        }
+
+        var period = new AccountingPeriod
+        {
+            Id = Guid.NewGuid(),
+            Year = year,
+            Month = month,
+            IsClosed = false
+        };
+
+        var createdPeriod = await periodRepository.AddAsync(period);
+        return MapToDto(createdPeriod);
+    }
+
     private async Task<AccountingPeriodDto> MarkAsClosed(AccountingPeriod? period, int year, int month, Guid? closingEntryId)
     {
         if (period == null)
