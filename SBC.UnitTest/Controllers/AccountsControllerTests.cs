@@ -104,4 +104,22 @@ public class AccountsControllerTests
         var actionResult = Assert.IsType<ActionResult<SbcGenericResponse>>(result);
         Assert.IsType<NoContentResult>(actionResult.Result);
     }
+
+    [Fact]
+    public async Task GetTree_ShouldReturnOk()
+    {
+        // Arrange
+        var tree = new List<AccountDto> { new() { Id = Guid.NewGuid(), Name = "Root", Children = new List<AccountDto>() } };
+        _serviceMock.Setup(s => s.GetTreeAsync()).ReturnsAsync(tree);
+
+        // Act
+        var result = await _controller.GetTree();
+
+        // Assert
+        var actionResult = Assert.IsType<ActionResult<IEnumerable<AccountDto>>>(result);
+        var objectResult = Assert.IsType<OkObjectResult>(actionResult.Result);
+        var response = Assert.IsType<SbcGenericResponse<IEnumerable<AccountDto>>>(objectResult.Value);
+        Assert.True(response.Success);
+        Assert.Equal(tree, response.Data);
+    }
 }

@@ -1,5 +1,5 @@
-@SBC_HostAddress = http://localhost:5164
-@auth_token = ...
+#@SBC_HostAddress = http://localhost:5164
+#@auth_token = ...
 
 # @name api/auth/register
 POST {{SBC_HostAddress}}/api/auth/register
@@ -48,6 +48,12 @@ Content-Type: application/json
 
 # @name api/accounts/getAll
 GET {{SBC_HostAddress}}/api/accounts
+Authorization: Bearer {{auth_token}}
+
+###
+
+# @name api/accounts/getTree
+GET {{SBC_HostAddress}}/api/accounts/tree
 Authorization: Bearer {{auth_token}}
 
 ###

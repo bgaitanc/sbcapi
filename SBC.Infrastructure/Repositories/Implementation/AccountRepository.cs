@@ -27,4 +27,15 @@ public class AccountRepository(SbcDbContext context) : BaseRepository<Account>(c
     {
         return await _dbSet.AnyAsync(a => a.Code == code);
     }
+
+    public async Task<IEnumerable<Account>> GetRootsWithChildrenAsync()
+    {
+        // Para soportar N niveles, traemos todas las cuentas y construimos el árbol en memoria o usamos Includes profundos.
+        // Dado que un catálogo contable no suele ser masivo, traer todo es viable.
+        return await _dbSet
+            .Include(a => a.SubAccounts)
+            .Where(a => a.ParentAccountId == null)
+            .OrderBy(a => a.Code)
+            .ToListAsync();
+    }
 }

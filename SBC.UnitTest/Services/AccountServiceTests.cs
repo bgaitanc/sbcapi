@@ -194,4 +194,29 @@ public class AccountServiceTests
         var exception = await Assert.ThrowsAsync<SbcException>(() => _service.DeleteAsync(id));
         Assert.Equal(HttpStatusCode.BadRequest, exception.StatusCode);
     }
+
+    [Fact]
+    public async Task GetTreeAsync_ShouldReturnHierarchicalStructure()
+    {
+        // Arrange
+        var rootId = Guid.NewGuid();
+        var childId = Guid.NewGuid();
+        var accounts = new List<Account>
+        {
+            new() { Id = rootId, Code = "1", Name = "Activo", Type = AccountType.Asset, ParentAccountId = null },
+            new() { Id = childId, Code = "1.1", Name = "Caja", Type = AccountType.Asset, ParentAccountId = rootId }
+        };
+        _accountRepoMock.Setup(r => r.GetAllAsync()).ReturnsAsync(accounts);
+
+        // Act
+        var result = await _service.GetTreeAsync();
+
+        // Assert
+        Assert.NotNull(result);
+        var roots = result.ToList();
+        Assert.Single(roots);
+        Assert.Equal(rootId, roots[0].Id);
+        Assert.Single(roots[0].Children);
+        Assert.Equal(childId, roots[0].Children[0].Id);
+    }
 }

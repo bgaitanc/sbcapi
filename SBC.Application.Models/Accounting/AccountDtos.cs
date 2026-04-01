@@ -15,6 +15,7 @@ public class AccountDto
     public string? CreatedBy { get; set; }
     public DateTime? UpdatedAt { get; set; }
     public string? UpdatedBy { get; set; }
+    public List<AccountDto> Children { get; set; } = new List<AccountDto>();
 }
 
 public class CreateAccountDto

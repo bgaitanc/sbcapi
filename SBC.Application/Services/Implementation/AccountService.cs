@@ -28,6 +28,29 @@ public class AccountService : IAccountService
         return accounts.Select(MapToDto);
     }
 
+    public async Task<IEnumerable<AccountDto>> GetTreeAsync()
+    {
+        // Traemos todas las cuentas para asegurar que podemos construir el árbol completo en memoria
+        // incluso si EF no cargó todos los niveles recursivamente con Include.
+        var allAccounts = await _accountRepository.GetAllAsync();
+        var allDtos = allAccounts.Select(MapToDto).ToList();
+
+        var roots = allDtos.Where(a => a.ParentAccountId == null).OrderBy(a => a.Code).ToList();
+        var childrenMap = allDtos.Where(a => a.ParentAccountId != null)
+            .GroupBy(a => a.ParentAccountId)
+            .ToDictionary(g => g.Key!.Value, g => g.OrderBy(a => a.Code).ToList());
+
+        foreach (var dto in allDtos)
+        {
+            if (childrenMap.TryGetValue(dto.Id, out var children))
+            {
+                dto.Children = children;
+            }
+        }
+
+        return roots;
+    }
+
     public async Task<AccountDto> CreateAsync(CreateAccountDto createDto)
     {
         if (await _accountRepository.ExistsByCodeAsync(createDto.Code))

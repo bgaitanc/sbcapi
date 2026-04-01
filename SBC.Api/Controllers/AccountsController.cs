@@ -25,6 +25,12 @@ public class AccountsController : SbcControllerBase
         return await ExecuteServiceAsync(() => _accountService.GetAllAsync());
     }
 
+    [HttpGet("tree")]
+    public async Task<ActionResult<IEnumerable<AccountDto>>> GetTree()
+    {
+        return await ExecuteServiceAsync(() => _accountService.GetTreeAsync());
+    }
+
     [HttpGet("{id:guid}")]
     public async Task<ActionResult<AccountDto>> GetById(Guid id)
     {
