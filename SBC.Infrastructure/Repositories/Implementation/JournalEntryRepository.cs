@@ -39,6 +39,7 @@ public class JournalEntryRepository(SbcDbContext context) : BaseRepository<Journ
     {
         return await _dbSet
             .Include(j => j.Lines)
+                .ThenInclude(l => l.Account)
             .FirstOrDefaultAsync(j => j.Id == id);
     }
 
@@ -56,6 +57,7 @@ public class JournalEntryRepository(SbcDbContext context) : BaseRepository<Journ
     {
         return await _dbSet
             .Include(j => j.Lines)
+                .ThenInclude(l => l.Account)
             .OrderByDescending(j => j.Date)
             .ThenByDescending(j => j.Code)
             .Take(count)
@@ -91,6 +93,7 @@ public class JournalEntryRepository(SbcDbContext context) : BaseRepository<Journ
 
         var items = await query
             .Include(j => j.Lines)
+                .ThenInclude(l => l.Account)
             .OrderByDescending(j => j.Date)
             .ThenByDescending(j => j.Code)
             .Skip((pageNumber - 1) * pageSize)
