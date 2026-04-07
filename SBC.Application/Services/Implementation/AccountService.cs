@@ -2,6 +2,8 @@
 using SBC.Application.Models.Accounting;
 using SBC.Application.Services.Interfaces;
 using SBC.Domain.Entities.Accounting;
+using SBC.Domain.Entities.Enums;
+using SBC.Domain.Entities.Logging;
 using SBC.Domain.Exceptions;
 using SBC.Domain.Repositories.Interfaces;
 using System.Text.Json;
@@ -59,7 +61,7 @@ public class AccountService : IAccountService
         if (await _accountRepository.ExistsByCodeAsync(createDto.Code))
         {
             var error = $"La cuenta con código {createDto.Code} ya existe.";
-            await _transactionLogService.LogTransactionAsync(null, "CreateAccount", "Account", null, "ValidationError", JsonSerializer.Serialize(createDto), error);
+            await _transactionLogService.LogTransactionAsync(null, TransactionActions.CreateAccount, nameof(Account), null, TransactionStatus.ValidationError, JsonSerializer.Serialize(createDto), error);
             throw new SbcException(HttpStatusCode.BadRequest, error);
         }
 
@@ -73,7 +75,7 @@ public class AccountService : IAccountService
         };
 
         var createdAccount = await _accountRepository.AddAsync(account);
-        await _transactionLogService.LogTransactionAsync(null, "CreateAccount", "Account", createdAccount.Id.ToString(), "Success", JsonSerializer.Serialize(createDto));
+        await _transactionLogService.LogTransactionAsync(null, TransactionActions.CreateAccount, nameof(Account), createdAccount.Id.ToString(), TransactionStatus.Success, JsonSerializer.Serialize(createDto));
         return MapToDto(createdAccount);
     }
 
@@ -83,14 +85,14 @@ public class AccountService : IAccountService
         if (account == null)
         {
             var error = "Cuenta no encontrada.";
-            await _transactionLogService.LogTransactionAsync(null, "UpdateAccount", "Account", id.ToString(), "Failure", JsonSerializer.Serialize(updateDto), error);
+            await _transactionLogService.LogTransactionAsync(null, TransactionActions.UpdateAccount, nameof(Account), id.ToString(), TransactionStatus.Failure, JsonSerializer.Serialize(updateDto), error);
             throw new SbcException(HttpStatusCode.NotFound, error);
         }
 
         if (account.Code != updateDto.Code && await _accountRepository.ExistsByCodeAsync(updateDto.Code))
         {
             var error = $"La cuenta con código {updateDto.Code} ya existe.";
-            await _transactionLogService.LogTransactionAsync(null, "UpdateAccount", "Account", id.ToString(), "ValidationError", JsonSerializer.Serialize(updateDto), error);
+            await _transactionLogService.LogTransactionAsync(null, TransactionActions.UpdateAccount, nameof(Account), id.ToString(), TransactionStatus.ValidationError, JsonSerializer.Serialize(updateDto), error);
             throw new SbcException(HttpStatusCode.BadRequest, error);
         }
 
@@ -100,7 +102,7 @@ public class AccountService : IAccountService
         account.ParentAccountId = updateDto.ParentAccountId;
 
         await _accountRepository.UpdateAsync(account);
-        await _transactionLogService.LogTransactionAsync(null, "UpdateAccount", "Account", id.ToString(), "Success", JsonSerializer.Serialize(updateDto));
+        await _transactionLogService.LogTransactionAsync(null, TransactionActions.UpdateAccount, nameof(Account), id.ToString(), TransactionStatus.Success, JsonSerializer.Serialize(updateDto));
     }
 
     public async Task DeleteAsync(Guid id)
@@ -109,19 +111,19 @@ public class AccountService : IAccountService
         if (account == null)
         {
             var error = "Cuenta no encontrada.";
-            await _transactionLogService.LogTransactionAsync(null, "DeleteAccount", "Account", id.ToString(), "Failure", null, error);
+            await _transactionLogService.LogTransactionAsync(null, TransactionActions.DeleteAccount, nameof(Account), id.ToString(), TransactionStatus.Failure, null, error);
             throw new SbcException(HttpStatusCode.NotFound, error);
         }
 
         if (account.SubAccounts != null && account.SubAccounts.Any())
         {
             var error = "No se puede eliminar una cuenta que tiene subcuentas.";
-            await _transactionLogService.LogTransactionAsync(null, "DeleteAccount", "Account", id.ToString(), "ValidationError", null, error);
+            await _transactionLogService.LogTransactionAsync(null, TransactionActions.DeleteAccount, nameof(Account), id.ToString(), TransactionStatus.ValidationError, null, error);
             throw new SbcException(HttpStatusCode.BadRequest, error);
         }
 
         await _accountRepository.DeleteAsync(account);
-        await _transactionLogService.LogTransactionAsync(null, "DeleteAccount", "Account", id.ToString(), "Success");
+        await _transactionLogService.LogTransactionAsync(null, TransactionActions.DeleteAccount, nameof(Account), id.ToString(), TransactionStatus.Success);
     }
 
     private static AccountDto MapToDto(Account account)

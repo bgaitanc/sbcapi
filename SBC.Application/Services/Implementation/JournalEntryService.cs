@@ -1,6 +1,8 @@
 ﻿using SBC.Application.Models.Accounting;
 using SBC.Application.Services.Interfaces;
 using SBC.Domain.Entities.Accounting;
+using SBC.Domain.Entities.Enums;
+using SBC.Domain.Entities.Logging;
 using SBC.Domain.Exceptions;
 using SBC.Domain.Repositories.Interfaces;
 using ClosedXML.Excel;
@@ -44,14 +46,14 @@ public class JournalEntryService(IJournalEntryRepository repository, ITransactio
         if (!entry.ValidateDoubleEntry())
         {
             var error = "El asiento no cumple con el principio de partida doble.";
-            await transactionLogService.LogTransactionAsync(null, "CreateJournalEntry", "JournalEntry", null, "ValidationError", JsonSerializer.Serialize(createDto), error);
+            await transactionLogService.LogTransactionAsync(null, TransactionActions.CreateJournalEntry, nameof(JournalEntry), null, TransactionStatus.ValidationError, JsonSerializer.Serialize(createDto), error);
             throw new DomainException(error);
         }
 
         entry.Code = await GenerateCodeAsync(entry.Year, entry.Month);
 
         var createdEntry = await repository.AddAsync(entry);
-        await transactionLogService.LogTransactionAsync(null, "CreateJournalEntry", "JournalEntry", createdEntry.Id.ToString(), "Success", JsonSerializer.Serialize(createDto));
+        await transactionLogService.LogTransactionAsync(null, TransactionActions.CreateJournalEntry, nameof(JournalEntry), createdEntry.Id.ToString(), TransactionStatus.Success, JsonSerializer.Serialize(createDto));
         return MapToDto(createdEntry);
     }
 
@@ -61,13 +63,13 @@ public class JournalEntryService(IJournalEntryRepository repository, ITransactio
         if (entry == null)
         {
             var error = $"JournalEntry with id {id} was not found.";
-            await transactionLogService.LogTransactionAsync(null, "UpdateJournalEntry", "JournalEntry", id.ToString(), "Failure", JsonSerializer.Serialize(updateDto), error);
+            await transactionLogService.LogTransactionAsync(null, TransactionActions.UpdateJournalEntry, nameof(JournalEntry), id.ToString(), TransactionStatus.Failure, JsonSerializer.Serialize(updateDto), error);
             throw new NotFoundException(nameof(JournalEntry), id);
         }
         if (entry.IsPosted)
         {
             var error = "No se puede editar un asiento que ya ha sido mayorizado.";
-            await transactionLogService.LogTransactionAsync(null, "UpdateJournalEntry", "JournalEntry", id.ToString(), "ValidationError", JsonSerializer.Serialize(updateDto), error);
+            await transactionLogService.LogTransactionAsync(null, TransactionActions.UpdateJournalEntry, nameof(JournalEntry), id.ToString(), TransactionStatus.ValidationError, JsonSerializer.Serialize(updateDto), error);
             throw new DomainException(error);
         }
 
@@ -94,12 +96,12 @@ public class JournalEntryService(IJournalEntryRepository repository, ITransactio
         if (!entry.ValidateDoubleEntry())
         {
             var error = "El asiento no cumple con el principio de partida doble.";
-            await transactionLogService.LogTransactionAsync(null, "UpdateJournalEntry", "JournalEntry", id.ToString(), "ValidationError", JsonSerializer.Serialize(updateDto), error);
+            await transactionLogService.LogTransactionAsync(null, TransactionActions.UpdateJournalEntry, nameof(JournalEntry), id.ToString(), TransactionStatus.ValidationError, JsonSerializer.Serialize(updateDto), error);
             throw new DomainException(error);
         }
 
         await repository.UpdateAsync(entry);
-        await transactionLogService.LogTransactionAsync(null, "UpdateJournalEntry", "JournalEntry", id.ToString(), "Success", JsonSerializer.Serialize(updateDto));
+        await transactionLogService.LogTransactionAsync(null, TransactionActions.UpdateJournalEntry, nameof(JournalEntry), id.ToString(), TransactionStatus.Success, JsonSerializer.Serialize(updateDto));
     }
 
     public async Task DeleteAsync(Guid id)
@@ -108,18 +110,18 @@ public class JournalEntryService(IJournalEntryRepository repository, ITransactio
         if (entry == null)
         {
             var error = $"JournalEntry with id {id} was not found.";
-            await transactionLogService.LogTransactionAsync(null, "DeleteJournalEntry", "JournalEntry", id.ToString(), "Failure", null, error);
+            await transactionLogService.LogTransactionAsync(null, TransactionActions.DeleteJournalEntry, nameof(JournalEntry), id.ToString(), TransactionStatus.Failure, null, error);
             throw new NotFoundException(nameof(JournalEntry), id);
         }
         if (entry.IsPosted)
         {
             var error = "No se puede eliminar un asiento que ya ha sido mayorizado.";
-            await transactionLogService.LogTransactionAsync(null, "DeleteJournalEntry", "JournalEntry", id.ToString(), "ValidationError", null, error);
+            await transactionLogService.LogTransactionAsync(null, TransactionActions.DeleteJournalEntry, nameof(JournalEntry), id.ToString(), TransactionStatus.ValidationError, null, error);
             throw new DomainException(error);
         }
 
         await repository.DeleteAsync(entry);
-        await transactionLogService.LogTransactionAsync(null, "DeleteJournalEntry", "JournalEntry", id.ToString(), "Success");
+        await transactionLogService.LogTransactionAsync(null, TransactionActions.DeleteJournalEntry, nameof(JournalEntry), id.ToString(), TransactionStatus.Success);
     }
 
     private async Task<string> GenerateCodeAsync(int year, int month)

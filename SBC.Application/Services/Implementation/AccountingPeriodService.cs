@@ -1,6 +1,8 @@
 ﻿using SBC.Application.Models.Accounting;
 using SBC.Application.Services.Interfaces;
 using SBC.Domain.Entities.Accounting;
+using SBC.Domain.Entities.Enums;
+using SBC.Domain.Entities.Logging;
 using SBC.Domain.Exceptions;
 using SBC.Domain.Repositories.Interfaces;
 using System.Text.Json;
@@ -21,7 +23,7 @@ public class AccountingPeriodService(
         if (period != null && period.IsClosed)
         {
             var error = $"El período {month}/{year} ya se encuentra cerrado.";
-            await transactionLogService.LogTransactionAsync(null, "CloseAccountingPeriod", "AccountingPeriod", null, "ValidationError", JsonSerializer.Serialize(new { year, month, equityAccountId }), error);
+            await transactionLogService.LogTransactionAsync(null, TransactionActions.CloseAccountingPeriod, nameof(AccountingPeriod), null, TransactionStatus.ValidationError, JsonSerializer.Serialize(new { year, month, equityAccountId }), error);
             throw new DomainException(error);
         }
 
@@ -30,7 +32,7 @@ public class AccountingPeriodService(
         if (equityAccount == null)
         {
             var error = $"Account with id {equityAccountId} was not found.";
-            await transactionLogService.LogTransactionAsync(null, "CloseAccountingPeriod", "AccountingPeriod", null, "Failure", JsonSerializer.Serialize(new { year, month, equityAccountId }), error);
+            await transactionLogService.LogTransactionAsync(null, TransactionActions.CloseAccountingPeriod, nameof(AccountingPeriod), null, TransactionStatus.Failure, JsonSerializer.Serialize(new { year, month, equityAccountId }), error);
             throw new NotFoundException(nameof(Account), equityAccountId);
         }
 
@@ -53,7 +55,7 @@ public class AccountingPeriodService(
         {
             // No hay nada que cerrar, pero marcamos el periodo como cerrado
             var result = await MarkAsClosed(period, year, month, null);
-            await transactionLogService.LogTransactionAsync(null, "CloseAccountingPeriod", "AccountingPeriod", result.Id.ToString(), "Success", JsonSerializer.Serialize(new { year, month, equityAccountId }));
+            await transactionLogService.LogTransactionAsync(null, TransactionActions.CloseAccountingPeriod, nameof(AccountingPeriod), result.Id.ToString(), TransactionStatus.Success, JsonSerializer.Serialize(new { year, month, equityAccountId }));
             return result;
         }
 
@@ -132,7 +134,7 @@ public class AccountingPeriodService(
         if (!closingEntry.ValidateDoubleEntry())
         {
             var error = "Error al generar el asiento de cierre: No cumple con la partida doble.";
-            await transactionLogService.LogTransactionAsync(null, "CloseAccountingPeriod", "AccountingPeriod", null, "ValidationError", JsonSerializer.Serialize(new { year, month, equityAccountId }), error);
+            await transactionLogService.LogTransactionAsync(null, TransactionActions.CloseAccountingPeriod, nameof(AccountingPeriod), null, TransactionStatus.ValidationError, JsonSerializer.Serialize(new { year, month, equityAccountId }), error);
             throw new DomainException(error);
         }
 
@@ -141,7 +143,7 @@ public class AccountingPeriodService(
 
         // 6. Marcar periodo como cerrado
         var closedPeriod = await MarkAsClosed(period, year, month, createdEntry.Id);
-        await transactionLogService.LogTransactionAsync(null, "CloseAccountingPeriod", "AccountingPeriod", closedPeriod.Id.ToString(), "Success", JsonSerializer.Serialize(new { year, month, equityAccountId }));
+        await transactionLogService.LogTransactionAsync(null, TransactionActions.CloseAccountingPeriod, nameof(AccountingPeriod), closedPeriod.Id.ToString(), TransactionStatus.Success, JsonSerializer.Serialize(new { year, month, equityAccountId }));
         return closedPeriod;
     }
 
@@ -163,7 +165,7 @@ public class AccountingPeriodService(
         if (existingPeriod != null)
         {
             var error = $"El período {month}/{year} ya existe.";
-            await transactionLogService.LogTransactionAsync(null, "CreateAccountingPeriod", "AccountingPeriod", null, "ValidationError", JsonSerializer.Serialize(new { year, month }), error);
+            await transactionLogService.LogTransactionAsync(null, TransactionActions.CreateAccountingPeriod, nameof(AccountingPeriod), null, TransactionStatus.ValidationError, JsonSerializer.Serialize(new { year, month }), error);
             throw new DomainException(error);
         }
 
@@ -176,7 +178,7 @@ public class AccountingPeriodService(
         };
 
         var createdPeriod = await periodRepository.AddAsync(period);
-        await transactionLogService.LogTransactionAsync(null, "CreateAccountingPeriod", "AccountingPeriod", createdPeriod.Id.ToString(), "Success", JsonSerializer.Serialize(new { year, month }));
+        await transactionLogService.LogTransactionAsync(null, TransactionActions.CreateAccountingPeriod, nameof(AccountingPeriod), createdPeriod.Id.ToString(), TransactionStatus.Success, JsonSerializer.Serialize(new { year, month }));
         return MapToDto(createdPeriod);
     }
 

@@ -280,3 +280,13 @@ Content-Type: application/json
 }
 
 ###
+
+# @name api/transactionLogs/getLogs
+GET {{SBC_HostAddress}}/api/transactionLogs?pageNumber=1&pageSize=10
+Authorization: Bearer {{auth_token}}
+
+###
+
+# @name api/transactionLogs/getLogsFiltered
+GET {{SBC_HostAddress}}/api/transactionLogs?action=Login&status=Success&pageNumber=1&pageSize=10
+Authorization: Bearer {{auth_token}}

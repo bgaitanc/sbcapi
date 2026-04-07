@@ -1,6 +1,7 @@
 ﻿using SBC.Application.Models.Accounting;
 using SBC.Application.Services.Interfaces;
 using SBC.Domain.Entities.Enums;
+using SBC.Domain.Entities.Logging;
 using SBC.Domain.Repositories.Interfaces;
 using System.Text.Json;
 
@@ -75,7 +76,7 @@ public class FinancialReportService(
         report.Expenses = expenseLines;
         report.TotalExpenses = expenseLines.Sum(e => e.Amount);
 
-        await transactionLogService.LogTransactionAsync(null, "GenerateIncomeStatement", "Report", null, "Success", JsonSerializer.Serialize(new { startDate, endDate }));
+        await transactionLogService.LogTransactionAsync(null, TransactionActions.GenerateIncomeStatement, nameof(IncomeStatementDto), null, TransactionStatus.Success, JsonSerializer.Serialize(new { startDate, endDate }));
 
         return report;
     }
@@ -150,7 +151,7 @@ public class FinancialReportService(
         var expenses = allLines.Where(l => l.Account.Type == AccountType.Expense).Sum(l => l.Debit - l.Credit);
         report.NetIncome = revenue - costs - expenses;
 
-        await transactionLogService.LogTransactionAsync(null, "GenerateBalanceSheet", "Report", null, "Success", JsonSerializer.Serialize(new { date }));
+        await transactionLogService.LogTransactionAsync(null, TransactionActions.GenerateBalanceSheet, nameof(BalanceSheetDto), null, TransactionStatus.Success, JsonSerializer.Serialize(new { date }));
 
         return report;
     }

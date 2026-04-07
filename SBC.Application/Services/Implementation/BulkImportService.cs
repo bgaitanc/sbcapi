@@ -2,6 +2,8 @@
 using SBC.Application.Models.Accounting;
 using SBC.Application.Services.Interfaces;
 using SBC.Domain.Entities.Accounting;
+using SBC.Domain.Entities.Enums;
+using SBC.Domain.Entities.Logging;
 using SBC.Domain.Repositories.Interfaces;
 using System.Text.Json;
 
@@ -27,7 +29,7 @@ public class BulkImportService(
             var error = "El archivo Excel no contiene ninguna hoja.";
             result.Errors.Add(error);
             result.ErrorCount = 1;
-            await transactionLogService.LogTransactionAsync(null, "BulkImport", "BulkImport", null, "ValidationError", JsonSerializer.Serialize(new { fileName }), error);
+            await transactionLogService.LogTransactionAsync(null, TransactionActions.BulkImport, nameof(BulkImport), null, TransactionStatus.ValidationError, JsonSerializer.Serialize(new { fileName }), error);
             return result;
         }
 
@@ -146,10 +148,10 @@ public class BulkImportService(
         };
         await repository.AddAsync(bulkImport);
 
-        var status = result.ErrorCount == 0 ? "Success" : (result.SuccessCount > 0 ? "PartialSuccess" : "Failure");
+        var status = result.ErrorCount == 0 ? TransactionStatus.Success : (result.SuccessCount > 0 ? TransactionStatus.PartialSuccess : TransactionStatus.Failure);
         var details = JsonSerializer.Serialize(new { fileName, result.SuccessCount, result.ErrorCount, TotalCount = attemptedEntriesCount });
         var errorMessage = result.ErrorCount > 0 ? string.Join("; ", result.Errors.Take(5)) : null;
-        await transactionLogService.LogTransactionAsync(null, "BulkImport", "BulkImport", bulkImport.Id.ToString(), status, details, errorMessage);
+        await transactionLogService.LogTransactionAsync(null, TransactionActions.BulkImport, nameof(BulkImport), bulkImport.Id.ToString(), status, details, errorMessage);
 
         return result;
     }

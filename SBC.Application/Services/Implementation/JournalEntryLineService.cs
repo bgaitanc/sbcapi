@@ -1,6 +1,8 @@
 ﻿using SBC.Application.Models.Accounting;
 using SBC.Application.Services.Interfaces;
 using SBC.Domain.Entities.Accounting;
+using SBC.Domain.Entities.Enums;
+using SBC.Domain.Entities.Logging;
 using SBC.Domain.Exceptions;
 using SBC.Domain.Repositories.Interfaces;
 using System.Text.Json;
@@ -30,13 +32,13 @@ public class JournalEntryLineService(
         if (entry == null)
         {
             var error = $"JournalEntry with id {createDto.JournalEntryId} was not found.";
-            await transactionLogService.LogTransactionAsync(null, "CreateJournalEntryLine", "JournalEntryLine", null, "Failure", JsonSerializer.Serialize(createDto), error);
+            await transactionLogService.LogTransactionAsync(null, TransactionActions.CreateJournalEntryLine, nameof(JournalEntryLine), null, TransactionStatus.Failure, JsonSerializer.Serialize(createDto), error);
             throw new NotFoundException(nameof(JournalEntry), createDto.JournalEntryId);
         }
         if (entry.IsPosted)
         {
             var error = "No se pueden agregar líneas a un asiento mayorizado.";
-            await transactionLogService.LogTransactionAsync(null, "CreateJournalEntryLine", "JournalEntryLine", null, "ValidationError", JsonSerializer.Serialize(createDto), error);
+            await transactionLogService.LogTransactionAsync(null, TransactionActions.CreateJournalEntryLine, nameof(JournalEntryLine), null, TransactionStatus.ValidationError, JsonSerializer.Serialize(createDto), error);
             throw new DomainException(error);
         }
 
@@ -54,12 +56,12 @@ public class JournalEntryLineService(
         if (!entry.ValidateDoubleEntry())
         {
             var error = "La operación resultaría en un asiento que no cumple con la partida doble.";
-            await transactionLogService.LogTransactionAsync(null, "CreateJournalEntryLine", "JournalEntryLine", null, "ValidationError", JsonSerializer.Serialize(createDto), error);
+            await transactionLogService.LogTransactionAsync(null, TransactionActions.CreateJournalEntryLine, nameof(JournalEntryLine), null, TransactionStatus.ValidationError, JsonSerializer.Serialize(createDto), error);
             throw new DomainException(error);
         }
 
         var createdLine = await repository.AddAsync(line);
-        await transactionLogService.LogTransactionAsync(null, "CreateJournalEntryLine", "JournalEntryLine", createdLine.Id.ToString(), "Success", JsonSerializer.Serialize(createDto));
+        await transactionLogService.LogTransactionAsync(null, TransactionActions.CreateJournalEntryLine, nameof(JournalEntryLine), createdLine.Id.ToString(), TransactionStatus.Success, JsonSerializer.Serialize(createDto));
         return MapToDto(createdLine);
     }
 
@@ -69,7 +71,7 @@ public class JournalEntryLineService(
         if (line == null)
         {
             var error = $"JournalEntryLine with id {id} was not found.";
-            await transactionLogService.LogTransactionAsync(null, "UpdateJournalEntryLine", "JournalEntryLine", id.ToString(), "Failure", JsonSerializer.Serialize(updateDto), error);
+            await transactionLogService.LogTransactionAsync(null, TransactionActions.UpdateJournalEntryLine, nameof(JournalEntryLine), id.ToString(), TransactionStatus.Failure, JsonSerializer.Serialize(updateDto), error);
             throw new NotFoundException(nameof(JournalEntryLine), id);
         }
         
@@ -77,7 +79,7 @@ public class JournalEntryLineService(
         if (entry.IsPosted)
         {
             var error = "No se puede editar una línea de un asiento mayorizado.";
-            await transactionLogService.LogTransactionAsync(null, "UpdateJournalEntryLine", "JournalEntryLine", id.ToString(), "ValidationError", JsonSerializer.Serialize(updateDto), error);
+            await transactionLogService.LogTransactionAsync(null, TransactionActions.UpdateJournalEntryLine, nameof(JournalEntryLine), id.ToString(), TransactionStatus.ValidationError, JsonSerializer.Serialize(updateDto), error);
             throw new DomainException(error);
         }
 
@@ -88,12 +90,12 @@ public class JournalEntryLineService(
         if (!entry.ValidateDoubleEntry())
         {
             var error = "La operación resultaría en un asiento que no cumple con la partida doble.";
-            await transactionLogService.LogTransactionAsync(null, "UpdateJournalEntryLine", "JournalEntryLine", id.ToString(), "ValidationError", JsonSerializer.Serialize(updateDto), error);
+            await transactionLogService.LogTransactionAsync(null, TransactionActions.UpdateJournalEntryLine, nameof(JournalEntryLine), id.ToString(), TransactionStatus.ValidationError, JsonSerializer.Serialize(updateDto), error);
             throw new DomainException(error);
         }
 
         await repository.UpdateAsync(line);
-        await transactionLogService.LogTransactionAsync(null, "UpdateJournalEntryLine", "JournalEntryLine", id.ToString(), "Success", JsonSerializer.Serialize(updateDto));
+        await transactionLogService.LogTransactionAsync(null, TransactionActions.UpdateJournalEntryLine, nameof(JournalEntryLine), id.ToString(), TransactionStatus.Success, JsonSerializer.Serialize(updateDto));
     }
 
     public async Task DeleteAsync(Guid id)
@@ -102,7 +104,7 @@ public class JournalEntryLineService(
         if (line == null)
         {
             var error = $"JournalEntryLine with id {id} was not found.";
-            await transactionLogService.LogTransactionAsync(null, "DeleteJournalEntryLine", "JournalEntryLine", id.ToString(), "Failure", null, error);
+            await transactionLogService.LogTransactionAsync(null, TransactionActions.DeleteJournalEntryLine, nameof(JournalEntryLine), id.ToString(), TransactionStatus.Failure, null, error);
             throw new NotFoundException(nameof(JournalEntryLine), id);
         }
 
@@ -110,7 +112,7 @@ public class JournalEntryLineService(
         if (entry.IsPosted)
         {
             var error = "No se puede eliminar una línea de un asiento mayorizado.";
-            await transactionLogService.LogTransactionAsync(null, "DeleteJournalEntryLine", "JournalEntryLine", id.ToString(), "ValidationError", null, error);
+            await transactionLogService.LogTransactionAsync(null, TransactionActions.DeleteJournalEntryLine, nameof(JournalEntryLine), id.ToString(), TransactionStatus.ValidationError, null, error);
             throw new DomainException(error);
         }
 
@@ -119,12 +121,12 @@ public class JournalEntryLineService(
         if (entry.Lines.Count > 0 && !entry.ValidateDoubleEntry())
         {
             var error = "La operación resultaría en un asiento que no cumple con la partida doble.";
-            await transactionLogService.LogTransactionAsync(null, "DeleteJournalEntryLine", "JournalEntryLine", id.ToString(), "ValidationError", null, error);
+            await transactionLogService.LogTransactionAsync(null, TransactionActions.DeleteJournalEntryLine, nameof(JournalEntryLine), id.ToString(), TransactionStatus.ValidationError, null, error);
             throw new DomainException(error);
         }
 
         await repository.DeleteAsync(line);
-        await transactionLogService.LogTransactionAsync(null, "DeleteJournalEntryLine", "JournalEntryLine", id.ToString(), "Success");
+        await transactionLogService.LogTransactionAsync(null, TransactionActions.DeleteJournalEntryLine, nameof(JournalEntryLine), id.ToString(), TransactionStatus.Success);
     }
 
     private static JournalEntryLineDto MapToDto(JournalEntryLine line)

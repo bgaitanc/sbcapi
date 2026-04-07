@@ -24,7 +24,8 @@ public class TransactionLogConfiguration : IEntityTypeConfiguration<TransactionL
 
         builder.Property(x => x.Status)
             .IsRequired()
-            .HasMaxLength(50);
+            .HasMaxLength(50)
+            .HasConversion<string>();
 
         builder.Property(x => x.ErrorMessage)
             .HasMaxLength(2000);
@@ -34,5 +35,14 @@ public class TransactionLogConfiguration : IEntityTypeConfiguration<TransactionL
 
         builder.Property(x => x.Details)
             .HasMaxLength(4000);
+
+        builder.Property(x => x.LogDate)
+            .IsRequired();
+
+        // Indexes for performance optimization
+        builder.HasIndex(x => x.Action);
+        builder.HasIndex(x => x.EntityName);
+        builder.HasIndex(x => x.Status);
+        builder.HasIndex(x => x.LogDate);
     }
 }
