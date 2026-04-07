@@ -9,5 +9,4 @@ public interface IJournalEntryService
     Task<JournalEntryDto> CreateAsync(CreateJournalEntryDto createDto);
     Task UpdateAsync(Guid id, UpdateJournalEntryDto updateDto);
     Task DeleteAsync(Guid id);
-    Task<BulkJournalEntryImportResultDto> ImportFromExcelAsync(Stream excelStream);
 }

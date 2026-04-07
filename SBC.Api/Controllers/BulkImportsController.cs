@@ -1,0 +1,41 @@
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using SBC.Api.Controllers.Base;
+using SBC.Application.Models.Accounting;
+using SBC.Application.Services.Interfaces;
+
+namespace SBC.Api.Controllers;
+
+/// <summary>
+/// Controller for managing bulk import operations and history.
+/// </summary>
+[Authorize]
+[ApiController]
+[Route("api/[controller]")]
+public class BulkImportsController(IBulkImportService service) : SbcControllerBase
+{
+    /// <summary>
+    /// Retrieves the history of bulk journal entry imports.
+    /// </summary>
+    /// <returns>A collection of bulk import records.</returns>
+    [HttpGet]
+    public async Task<ActionResult<IEnumerable<BulkImportDto>>> GetHistory()
+    {
+        return await ExecuteServiceAsync(() => service.GetHistoryAsync());
+    }
+
+    /// <summary>
+    /// Imports journal entries from an Excel file and records the operation.
+    /// </summary>
+    /// <param name="file">The Excel file containing journal entries.</param>
+    /// <returns>A summary of the import operation results.</returns>
+    [HttpPost]
+    public async Task<ActionResult<BulkJournalEntryImportResultDto>> Import(IFormFile file)
+    {
+        if (file == null || file.Length == 0)
+            return BadRequest("No se ha proporcionado un archivo o el archivo está vacío.");
+
+        using var stream = file.OpenReadStream();
+        return await ExecuteServiceAsync(() => service.ImportFromExcelAsync(stream, file.FileName));
+    }
+}

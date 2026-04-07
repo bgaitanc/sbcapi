@@ -7,7 +7,7 @@ using ClosedXML.Excel;
 
 namespace SBC.Application.Services.Implementation;
 
-public class JournalEntryService(IJournalEntryRepository repository, IAccountRepository accountRepository) : IJournalEntryService
+public class JournalEntryService(IJournalEntryRepository repository) : IJournalEntryService
 {
     public async Task<JournalEntryDto?> GetByIdAsync(Guid id)
     {
@@ -92,135 +92,6 @@ public class JournalEntryService(IJournalEntryRepository repository, IAccountRep
         if (entry.IsPosted) throw new DomainException("No se puede eliminar un asiento que ya ha sido mayorizado.");
 
         await repository.DeleteAsync(entry);
-    }
-
-    public async Task<BulkJournalEntryImportResultDto> ImportFromExcelAsync(Stream excelStream)
-    {
-        var result = new BulkJournalEntryImportResultDto();
-        using var workbook = new XLWorkbook(excelStream);
-        var worksheet = workbook.Worksheets.FirstOrDefault();
-
-        if (worksheet == null)
-        {
-            result.Errors.Add("El archivo Excel no contiene ninguna hoja.");
-            result.ErrorCount = 1;
-            return result;
-        }
-
-        // Formato esperado:
-        // Col A: Fecha (DateTime)
-        // Col B: Descripción (String)
-        // Col C: Código Cuenta (String)
-        // Col D: Debe (Decimal)
-        // Col E: Haber (Decimal)
-        // Col F: Referencia Agrupador (Opcional, para agrupar líneas en un mismo asiento si la fecha y descripción coinciden)
-
-        var rows = worksheet.RowsUsed().Skip(1); // Saltar encabezado
-        var journalEntriesToCreate = new List<JournalEntry>();
-        var currentGroup = string.Empty;
-        JournalEntry? currentEntry = null;
-
-        int rowNumber = 1;
-        foreach (var row in rows)
-        {
-            rowNumber++;
-            try
-            {
-                var date = row.Cell(1).GetDateTime();
-                var description = row.Cell(2).GetString();
-                var accountCode = row.Cell(3).GetString();
-                var debit = row.Cell(4).GetValue<decimal>();
-                var credit = row.Cell(5).GetValue<decimal>();
-                var groupRef = row.Cell(6).GetString();
-
-                if (string.IsNullOrWhiteSpace(accountCode))
-                {
-                    result.Errors.Add($"Fila {rowNumber}: El código de cuenta es obligatorio.");
-                    continue;
-                }
-
-                var account = await accountRepository.GetByCodeAsync(accountCode);
-                if (account == null)
-                {
-                    result.Errors.Add($"Fila {rowNumber}: No se encontró la cuenta con código '{accountCode}'.");
-                    continue;
-                }
-
-                // Lógica de agrupación: si groupRef es igual al anterior y no está vacío, pertenece al mismo asiento
-                // Si es vacío, cada línea es un asiento (no recomendado pero posible) o usamos fecha+descripción como clave
-                var currentKey = string.IsNullOrWhiteSpace(groupRef) 
-                    ? $"{date:yyyyMMdd}-{description}" 
-                    : groupRef;
-
-                if (currentEntry == null || currentGroup != currentKey)
-                {
-                    // Si ya teníamos un asiento, validamos partida doble antes de empezar uno nuevo
-                    if (currentEntry != null)
-                    {
-                        if (!currentEntry.ValidateDoubleEntry())
-                        {
-                            result.Errors.Add($"Asiento '{currentEntry.Description}' ({currentGroup}): No cumple partida doble (Debe: {currentEntry.Lines.Sum(l => l.Debit)}, Haber: {currentEntry.Lines.Sum(l => l.Credit)}).");
-                            // No añadimos este asiento a la lista final
-                        }
-                        else
-                        {
-                            currentEntry.Code = await GenerateCodeAsync(currentEntry.Year, currentEntry.Month);
-                            journalEntriesToCreate.Add(currentEntry);
-                            result.SuccessCount++;
-                        }
-                    }
-
-                    currentEntry = new JournalEntry
-                    {
-                        Id = Guid.NewGuid(),
-                        Date = date,
-                        Day = date.Day,
-                        Month = date.Month,
-                        Year = date.Year,
-                        Description = description,
-                        Lines = new List<JournalEntryLine>()
-                    };
-                    currentGroup = currentKey;
-                }
-
-                currentEntry.Lines.Add(new JournalEntryLine
-                {
-                    Id = Guid.NewGuid(),
-                    JournalEntryId = currentEntry.Id,
-                    AccountId = account.Id,
-                    Debit = debit,
-                    Credit = credit
-                });
-            }
-            catch (Exception ex)
-            {
-                result.Errors.Add($"Fila {rowNumber}: Error al procesar la fila. Detalle: {ex.Message}");
-            }
-        }
-
-        // Validar el último asiento procesado
-        if (currentEntry != null)
-        {
-            if (!currentEntry.ValidateDoubleEntry())
-            {
-                result.Errors.Add($"Asiento '{currentEntry.Description}' ({currentGroup}): No cumple partida doble (Debe: {currentEntry.Lines.Sum(l => l.Debit)}, Haber: {currentEntry.Lines.Sum(l => l.Credit)}).");
-            }
-            else
-            {
-                currentEntry.Code = await GenerateCodeAsync(currentEntry.Year, currentEntry.Month);
-                journalEntriesToCreate.Add(currentEntry);
-                result.SuccessCount++;
-            }
-        }
-
-        // Guardar todos los asientos válidos
-        foreach (var entry in journalEntriesToCreate)
-        {
-            await repository.AddAsync(entry);
-        }
-
-        result.ErrorCount = result.Errors.Count;
-        return result;
     }
 
     private async Task<string> GenerateCodeAsync(int year, int month)

@@ -15,6 +15,7 @@ using SBC.Infrastructure.Repositories.Implementation;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
+builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddSwaggerGen(options =>
 {
@@ -81,6 +82,8 @@ builder.Services.AddScoped<IJournalEntryLineService, JournalEntryLineService>();
 builder.Services.AddScoped<IFinancialReportService, FinancialReportService>();
 builder.Services.AddScoped<IAccountingPeriodRepository, AccountingPeriodRepository>();
 builder.Services.AddScoped<IAccountingPeriodService, AccountingPeriodService>();
+builder.Services.AddScoped<IBulkImportRepository, BulkImportRepository>();
+builder.Services.AddScoped<IBulkImportService, BulkImportService>();
 
 builder.Services.AddCors(options =>
 {

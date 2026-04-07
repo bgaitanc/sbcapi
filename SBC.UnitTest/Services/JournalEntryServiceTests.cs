@@ -10,12 +10,11 @@ namespace SBC.UnitTest.Services;
 public class JournalEntryServiceTests
 {
     private readonly Mock<IJournalEntryRepository> _repositoryMock = new();
-    private readonly Mock<IAccountRepository> _accountRepositoryMock = new();
     private readonly JournalEntryService _service;
 
     public JournalEntryServiceTests()
     {
-        _service = new JournalEntryService(_repositoryMock.Object, _accountRepositoryMock.Object);
+        _service = new JournalEntryService(_repositoryMock.Object);
     }
 
     [Fact]

@@ -166,8 +166,8 @@ Authorization: Bearer {{auth_token}}
 
 ###
 
-# @name api/journalEntries/import
-POST {{SBC_HostAddress}}/api/journalEntries/import
+# @name api/bulkImports/import
+POST {{SBC_HostAddress}}/api/bulkImports
 Authorization: Bearer {{auth_token}}
 Content-Type: multipart/form-data; boundary=WebAppBoundary
 
@@ -177,6 +177,12 @@ Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
 
 < ./Asientos.xlsx
 --WebAppBoundary--
+
+###
+
+# @name api/bulkImports/getHistory
+GET {{SBC_HostAddress}}/api/bulkImports
+Authorization: Bearer {{auth_token}}
 
 ###
 

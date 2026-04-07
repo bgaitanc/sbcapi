@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
@@ -9,13 +10,14 @@ using SBC.Infrastructure.Database.Seeder;
 
 namespace SBC.Infrastructure.Database;
 
-public class SbcDbContext(DbContextOptions<SbcDbContext> options)
+public class SbcDbContext(DbContextOptions<SbcDbContext> options, IHttpContextAccessor httpContextAccessor)
     : IdentityDbContext<ApplicationUser, IdentityRole<Guid>, Guid>(options)
 {
     public DbSet<Account> Accounts { get; set; }
     public DbSet<JournalEntry> JournalEntries { get; set; }
     public DbSet<JournalEntryLine> JournalEntryLines { get; set; }
     public DbSet<AccountingPeriod> AccountingPeriods { get; set; }
+    public DbSet<BulkImport> BulkImports { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -45,6 +47,8 @@ public class SbcDbContext(DbContextOptions<SbcDbContext> options)
         var trackedEntities = GetTrackedEntities();
 
         var now = DateTime.Now;
+        var currentUser = httpContextAccessor.HttpContext?.User?.Identity?.Name ?? "system";
+
         foreach (var entityEntry in trackedEntities)
         {
             if (entityEntry.Entity is not BaseEntity entity) continue;
@@ -52,7 +56,9 @@ public class SbcDbContext(DbContextOptions<SbcDbContext> options)
             if (entityEntry.State == EntityState.Added)
             {
                 entity.CreatedAt = now;
+                entity.CreatedBy = currentUser;
                 Entry(entity).Property(x => x.CreatedAt).IsModified = true;
+                Entry(entity).Property(x => x.CreatedBy).IsModified = true;
                 Entry(entity).Property(x => x.UpdatedAt).IsModified = false;
                 Entry(entity).Property(x => x.UpdatedBy).IsModified = false;
             }
@@ -60,7 +66,9 @@ public class SbcDbContext(DbContextOptions<SbcDbContext> options)
             if (entityEntry.State != EntityState.Modified) continue;
 
             entity.UpdatedAt = now;
+            entity.UpdatedBy = currentUser;
             Entry(entity).Property(x => x.UpdatedAt).IsModified = true;
+            Entry(entity).Property(x => x.UpdatedBy).IsModified = true;
             Entry(entity).Property(x => x.CreatedAt).IsModified = false;
             Entry(entity).Property(x => x.CreatedBy).IsModified = false;
         }
