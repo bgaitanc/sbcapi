@@ -15,6 +15,8 @@ public class JournalEntryConfiguration : IEntityTypeConfiguration<JournalEntry>
         builder.Property(x => x.Code).IsRequired().HasMaxLength(20).HasColumnType("varchar(20)");
         builder.HasIndex(x => x.Code).IsUnique();
         builder.Property(x => x.Date).IsRequired().HasColumnType("datetime2");
+        builder.HasIndex(x => x.Date);
+        builder.HasIndex(x => new { x.Date, x.Code }).IsDescending(true, true);
         builder.Property(x => x.Day).IsRequired().HasColumnType("smallint");
         builder.Property(x => x.Month).IsRequired().HasColumnType("smallint");
         builder.Property(x => x.Year).IsRequired().HasColumnType("smallint");

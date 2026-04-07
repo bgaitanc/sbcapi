@@ -1,4 +1,5 @@
-﻿using SBC.Domain.Entities.Enums;
+﻿using SBC.Application.Models.Common;
+using SBC.Domain.Entities.Enums;
 
 namespace SBC.Application.Models.Logging;
 
@@ -16,13 +17,11 @@ public class TransactionLogDto
     public DateTime LogDate { get; set; }
 }
 
-public class TransactionLogFilterDto
+public class TransactionLogFilterDto : BaseFilterDto
 {
     public string? Action { get; set; }
     public string? EntityName { get; set; }
     public TransactionStatus? Status { get; set; }
     public DateTime? FromDate { get; set; }
     public DateTime? ToDate { get; set; }
-    public int PageNumber { get; set; } = 1;
-    public int PageSize { get; set; } = 10;
 }

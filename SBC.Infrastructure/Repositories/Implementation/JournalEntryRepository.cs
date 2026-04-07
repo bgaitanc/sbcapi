@@ -65,7 +65,7 @@ public class JournalEntryRepository(SbcDbContext context) : BaseRepository<Journ
     public async Task<(IEnumerable<JournalEntry> Items, int TotalCount)> GetPagedAsync(
         string? searchTerm, DateTime? fromDate, DateTime? toDate, bool? isPosted, int pageNumber, int pageSize)
     {
-        var query = _dbSet.Include(j => j.Lines).AsQueryable();
+        var query = _dbSet.AsNoTracking();
 
         if (!string.IsNullOrWhiteSpace(searchTerm))
         {
@@ -88,7 +88,9 @@ public class JournalEntryRepository(SbcDbContext context) : BaseRepository<Journ
         }
 
         var totalCount = await query.CountAsync();
+
         var items = await query
+            .Include(j => j.Lines)
             .OrderByDescending(j => j.Date)
             .ThenByDescending(j => j.Code)
             .Skip((pageNumber - 1) * pageSize)

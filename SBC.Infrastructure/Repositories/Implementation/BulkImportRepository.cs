@@ -13,7 +13,7 @@ public class BulkImportRepository(SbcDbContext context) : BaseRepository<BulkImp
     public async Task<(IEnumerable<BulkImport> Items, int TotalCount)> GetPagedAsync(
         string? fileName, DateTime? fromDate, DateTime? toDate, int pageNumber, int pageSize)
     {
-        var query = _dbSet.AsQueryable();
+        var query = _dbSet.AsNoTracking();
 
         if (!string.IsNullOrWhiteSpace(fileName))
         {
@@ -31,6 +31,7 @@ public class BulkImportRepository(SbcDbContext context) : BaseRepository<BulkImp
         }
 
         var totalCount = await query.CountAsync();
+
         var items = await query
             .OrderByDescending(i => i.CreatedAt)
             .Skip((pageNumber - 1) * pageSize)

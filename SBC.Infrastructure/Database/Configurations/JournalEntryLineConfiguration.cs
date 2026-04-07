@@ -18,6 +18,9 @@ public class JournalEntryLineConfiguration : IEntityTypeConfiguration<JournalEnt
         builder.HasOne(x => x.JournalEntry).WithMany(x => x.Lines).HasForeignKey(x => x.JournalEntryId)
             .OnDelete(DeleteBehavior.Restrict);
         builder.HasOne(x => x.Account).WithMany().HasForeignKey(x => x.AccountId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasIndex(x => x.AccountId);
+        builder.HasIndex(x => x.Debit);
+        builder.HasIndex(x => x.Credit);
 
         builder.ToTable(t =>
         {
