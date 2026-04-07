@@ -7,6 +7,8 @@ using SBC.Application.Services.Interfaces;
 using SBC.Domain.Entities.Accounting;
 using SBC.Domain.Exceptions;
 
+using SBC.Domain.Entities.Logging;
+
 namespace SBC.Api.Controllers;
 
 [Authorize]
@@ -17,7 +19,7 @@ public class JournalEntriesController(IJournalEntryService service) : SbcControl
     [HttpGet]
     public async Task<ActionResult<IEnumerable<JournalEntryDto>>> GetAll()
     {
-        return await ExecuteServiceAsync(() => service.GetAllAsync());
+        return await ExecuteServiceAsync(() => service.GetAllAsync(), HttpStatusCode.OK, TransactionActions.GetJournalEntries, nameof(JournalEntry));
     }
 
     [HttpGet("{id:guid}")]
@@ -28,7 +30,7 @@ public class JournalEntriesController(IJournalEntryService service) : SbcControl
             var entry = await service.GetByIdAsync(id);
             if (entry == null) throw new NotFoundException(nameof(JournalEntry), id);
             return entry;
-        });
+        }, HttpStatusCode.OK, TransactionActions.GetJournalEntries, nameof(JournalEntry), new { id });
     }
 
     [HttpPost]

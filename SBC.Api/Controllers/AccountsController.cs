@@ -5,6 +5,9 @@ using SBC.Api.Controllers.Base;
 using SBC.Application.Models.Accounting;
 using SBC.Application.Services.Interfaces;
 
+using SBC.Domain.Entities.Accounting;
+using SBC.Domain.Entities.Logging;
+
 namespace SBC.Api.Controllers;
 
 [Authorize]
@@ -22,13 +25,13 @@ public class AccountsController : SbcControllerBase
     [HttpGet]
     public async Task<ActionResult<IEnumerable<AccountDto>>> GetAll()
     {
-        return await ExecuteServiceAsync(() => _accountService.GetAllAsync());
+        return await ExecuteServiceAsync(() => _accountService.GetAllAsync(), HttpStatusCode.OK, TransactionActions.GetAccounts, nameof(Account));
     }
 
     [HttpGet("tree")]
     public async Task<ActionResult<IEnumerable<AccountDto>>> GetTree()
     {
-        return await ExecuteServiceAsync(() => _accountService.GetTreeAsync());
+        return await ExecuteServiceAsync(() => _accountService.GetTreeAsync(), HttpStatusCode.OK, TransactionActions.GetAccounts, nameof(Account), new { Type = "Tree" });
     }
 
     [HttpGet("{id:guid}")]
@@ -42,7 +45,7 @@ public class AccountsController : SbcControllerBase
                 throw new SBC.Domain.Exceptions.SbcException(HttpStatusCode.NotFound, "Cuenta no encontrada.");
             }
             return account;
-        });
+        }, HttpStatusCode.OK, TransactionActions.GetAccounts, nameof(Account), new { id });
     }
 
     [HttpPost]

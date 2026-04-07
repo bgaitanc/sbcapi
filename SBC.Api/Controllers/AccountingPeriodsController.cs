@@ -5,6 +5,9 @@ using SBC.Api.Controllers.Base;
 using SBC.Application.Models.Accounting;
 using SBC.Application.Services.Interfaces;
 
+using SBC.Domain.Entities.Accounting;
+using SBC.Domain.Entities.Logging;
+
 namespace SBC.Api.Controllers;
 
 [Authorize]
@@ -15,7 +18,7 @@ public class AccountingPeriodsController(IAccountingPeriodService service) : Sbc
     [HttpGet]
     public async Task<ActionResult<IEnumerable<AccountingPeriodDto>>> GetAll()
     {
-        return await ExecuteServiceAsync(() => service.GetAllPeriodsAsync());
+        return await ExecuteServiceAsync(() => service.GetAllPeriodsAsync(), HttpStatusCode.OK, TransactionActions.GetAccountingPeriods, nameof(AccountingPeriod));
     }
 
     [HttpGet("{year}/{month}")]
@@ -24,8 +27,8 @@ public class AccountingPeriodsController(IAccountingPeriodService service) : Sbc
         return await ExecuteServiceAsync(async () =>
         {
             var period = await service.GetByPeriodAsync(year, month);
-            return period ?? throw new Exception("Periodo no encontrado"); // SbcControllerBase maneja excepciones
-        });
+            return period ?? throw new Exception("Periodo no encontrado");
+        }, HttpStatusCode.OK, TransactionActions.GetAccountingPeriods, nameof(AccountingPeriod), new { year, month });
     }
 
     [HttpPost]

@@ -7,6 +7,9 @@ using SBC.Application.Services.Interfaces;
 using SBC.Domain.Entities.Accounting;
 using SBC.Domain.Exceptions;
 
+using SBC.Domain.Entities.Accounting;
+using SBC.Domain.Entities.Logging;
+
 namespace SBC.Api.Controllers;
 
 [Authorize]
@@ -22,13 +25,13 @@ public class JournalEntryLinesController(IJournalEntryLineService service) : Sbc
             var line = await service.GetByIdAsync(id);
             if (line == null) throw new NotFoundException(nameof(JournalEntryLine), id);
             return line;
-        });
+        }, HttpStatusCode.OK, TransactionActions.GetJournalEntryLines, nameof(JournalEntryLine), new { id });
     }
 
     [HttpGet("journal-entry/{journalEntryId:guid}")]
     public async Task<ActionResult<IEnumerable<JournalEntryLineDto>>> GetByJournalEntryId(Guid journalEntryId)
     {
-        return await ExecuteServiceAsync(() => service.GetByJournalEntryIdAsync(journalEntryId));
+        return await ExecuteServiceAsync(() => service.GetByJournalEntryIdAsync(journalEntryId), HttpStatusCode.OK, TransactionActions.GetJournalEntryLines, nameof(JournalEntryLine), new { journalEntryId });
     }
 
     [HttpPost]

@@ -44,3 +44,19 @@
 
 ### 6. API Client Testing (SBC.Api.http)
 - Whenever a new controller or endpoint is added, update the `SBC.Api\SBC.Api.http` file with its corresponding request example.
+
+### 7. Transaction Logging (TransactionLog)
+- All main system operations (CRUD, reports, bulk imports, authentication, etc.) MUST be logged using `ITransactionLogService`.
+- **Endpoint Call Logging**: All endpoint calls, including read operations (GET), MUST be logged. This includes recording the parameters used in the call.
+- Use the static class `TransactionActions` (in `SBC.Domain.Entities.Logging`) for the `action` parameter.
+- Use `nameof(Entity)` for the `entityName` parameter.
+- Use the `TransactionStatus` enum (in `SBC.Domain.Entities.Enums`) for the `status` parameter.
+- Log relevant transaction details (serialized parameters) and error messages when applicable to facilitate auditing.
+
+### 8. API Controllers and Service Execution
+- All new controllers must inherit from `SbcControllerBase` (located in `SBC.Api.Controllers.Base`).
+- Use the `ExecuteServiceAsync` method provided by `SbcControllerBase` to wrap service calls. This ensures a standardized response format using `ResultDto` or `PagedResultDto`.
+- **Automatic Logging**: When calling `ExecuteServiceAsync` from a controller, provide the optional parameters `logAction`, `entityName`, and `parameters` to automatically log the endpoint call and its arguments.
+  ```csharp
+  return await ExecuteServiceAsync(() => _service.GetData(id), HttpStatusCode.OK, TransactionActions.GetData, nameof(Entity), new { id });
+  ```

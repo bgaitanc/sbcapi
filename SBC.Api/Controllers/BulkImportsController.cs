@@ -1,8 +1,12 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using System.Net;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SBC.Api.Controllers.Base;
 using SBC.Application.Models.Accounting;
 using SBC.Application.Services.Interfaces;
+
+using SBC.Domain.Entities.Accounting;
+using SBC.Domain.Entities.Logging;
 
 namespace SBC.Api.Controllers;
 
@@ -21,7 +25,7 @@ public class BulkImportsController(IBulkImportService service) : SbcControllerBa
     [HttpGet]
     public async Task<ActionResult<IEnumerable<BulkImportDto>>> GetHistory()
     {
-        return await ExecuteServiceAsync(() => service.GetHistoryAsync());
+        return await ExecuteServiceAsync(() => service.GetHistoryAsync(), HttpStatusCode.OK, TransactionActions.GetBulkImports, nameof(BulkImport));
     }
 
     /// <summary>

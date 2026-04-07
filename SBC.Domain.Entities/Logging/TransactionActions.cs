@@ -22,6 +22,12 @@ public static class TransactionActions
     public const string RegisterUser = "RegisterUser";
     public const string Login = "Login";
     public const string RefreshToken = "RefreshToken";
+    public const string GetLogs = "GetLogs";
+    public const string GetAccounts = "GetAccounts";
+    public const string GetJournalEntries = "GetJournalEntries";
+    public const string GetAccountingPeriods = "GetAccountingPeriods";
+    public const string GetJournalEntryLines = "GetJournalEntryLines";
+    public const string GetBulkImports = "GetBulkImports";
 
     public const string GenerateIncomeStatement = "GenerateIncomeStatement";
     public const string GenerateBalanceSheet = "GenerateBalanceSheet";
