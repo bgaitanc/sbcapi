@@ -4,6 +4,7 @@ using Moq;
 using SBC.Api.Controllers;
 using SBC.Api.Controllers.Base;
 using SBC.Application.Models.Accounting;
+using SBC.Application.Models.Common;
 using SBC.Application.Services.Interfaces;
 
 namespace SBC.UnitTest.Controllers;
@@ -16,6 +17,31 @@ public class JournalEntryLinesControllerTests
     public JournalEntryLinesControllerTests()
     {
         _controller = new JournalEntryLinesController(_serviceMock.Object);
+    }
+
+    [Fact]
+    public async Task GetPaged_ShouldReturnOk()
+    {
+        // Arrange
+        var filter = new JournalEntryLineFilterDto { PageNumber = 1, PageSize = 10 };
+        var pagedResult = new PagedResultDto<JournalEntryLineDto>
+        {
+            Items = new List<JournalEntryLineDto> { new() { Id = Guid.NewGuid(), Debit = 100 } },
+            TotalCount = 1,
+            PageNumber = 1,
+            PageSize = 10
+        };
+        _serviceMock.Setup(s => s.GetPagedAsync(filter)).ReturnsAsync(pagedResult);
+
+        // Act
+        var result = await _controller.GetPaged(filter);
+
+        // Assert
+        var actionResult = Assert.IsType<ActionResult<PagedResultDto<JournalEntryLineDto>>>(result);
+        var objectResult = Assert.IsType<OkObjectResult>(actionResult.Result);
+        var response = Assert.IsType<SbcGenericResponse<PagedResultDto<JournalEntryLineDto>>>(objectResult.Value);
+        Assert.True(response.Success);
+        Assert.Equal(pagedResult, response.Data);
     }
 
     [Fact]

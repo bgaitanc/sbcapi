@@ -1,4 +1,5 @@
 ﻿using SBC.Application.Models.Accounting;
+using SBC.Application.Models.Common;
 using SBC.Application.Services.Interfaces;
 using SBC.Domain.Entities.Accounting;
 using SBC.Domain.Entities.Enums;
@@ -10,7 +11,10 @@ using System.Text.Json;
 
 namespace SBC.Application.Services.Implementation;
 
-public class JournalEntryService(IJournalEntryRepository repository, ITransactionLogService transactionLogService) : IJournalEntryService
+public class JournalEntryService(
+    IJournalEntryRepository repository,
+    IAccountingPeriodRepository accountingPeriodRepository,
+    ITransactionLogService transactionLogService) : IJournalEntryService
 {
     public async Task<JournalEntryDto?> GetByIdAsync(Guid id)
     {
@@ -24,8 +28,31 @@ public class JournalEntryService(IJournalEntryRepository repository, ITransactio
         return entries.Select(MapToDto);
     }
 
+    public async Task<PagedResultDto<JournalEntryDto>> GetPagedAsync(JournalEntryFilterDto filter)
+    {
+        var (items, totalCount) = await repository.GetPagedAsync(
+            filter.SearchTerm, filter.FromDate, filter.ToDate, filter.IsPosted, filter.PageNumber, filter.PageSize);
+
+        await transactionLogService.LogTransactionAsync(null, TransactionActions.GetJournalEntries, nameof(JournalEntry), null, TransactionStatus.Success, JsonSerializer.Serialize(filter));
+
+        return new PagedResultDto<JournalEntryDto>
+        {
+            Items = items.Select(MapToDto),
+            TotalCount = totalCount,
+            PageNumber = filter.PageNumber,
+            PageSize = filter.PageSize
+        };
+    }
+
     public async Task<JournalEntryDto> CreateAsync(CreateJournalEntryDto createDto)
     {
+        if (!await accountingPeriodRepository.IsPeriodOpenAsync(createDto.Date.Year, createDto.Date.Month))
+        {
+            var error = $"No existe un periodo contable abierto para {createDto.Date:MMMM yyyy}.";
+            await transactionLogService.LogTransactionAsync(null, TransactionActions.CreateJournalEntry, nameof(JournalEntry), null, TransactionStatus.ValidationError, JsonSerializer.Serialize(createDto), error);
+            throw new DomainException(error);
+        }
+
         var entry = new JournalEntry
         {
             Id = Guid.NewGuid(),
@@ -59,6 +86,13 @@ public class JournalEntryService(IJournalEntryRepository repository, ITransactio
 
     public async Task UpdateAsync(Guid id, UpdateJournalEntryDto updateDto)
     {
+        if (!await accountingPeriodRepository.IsPeriodOpenAsync(updateDto.Date.Year, updateDto.Date.Month))
+        {
+            var error = $"No existe un periodo contable abierto para {updateDto.Date:MMMM yyyy}.";
+            await transactionLogService.LogTransactionAsync(null, TransactionActions.UpdateJournalEntry, nameof(JournalEntry), id.ToString(), TransactionStatus.ValidationError, JsonSerializer.Serialize(updateDto), error);
+            throw new DomainException(error);
+        }
+
         var entry = await repository.GetByIdWithLinesAsync(id);
         if (entry == null)
         {

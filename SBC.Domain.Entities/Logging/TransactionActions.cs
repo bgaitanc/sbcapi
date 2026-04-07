@@ -31,4 +31,5 @@ public static class TransactionActions
 
     public const string GenerateIncomeStatement = "GenerateIncomeStatement";
     public const string GenerateBalanceSheet = "GenerateBalanceSheet";
+    public const string GetDashboardData = "GetDashboardData";
 }

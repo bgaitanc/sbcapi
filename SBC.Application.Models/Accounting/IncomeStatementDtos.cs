@@ -4,6 +4,7 @@ public class IncomeStatementDto
 {
     public DateTime StartDate { get; set; }
     public DateTime EndDate { get; set; }
+    public bool IsProvisional { get; set; }
     public List<IncomeStatementLineDto> Revenues { get; set; } = [];
     public decimal TotalRevenues { get; set; }
     public List<IncomeStatementLineDto> Costs { get; set; } = [];

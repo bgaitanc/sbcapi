@@ -11,12 +11,19 @@ namespace SBC.UnitTest.Services;
 public class JournalEntryServiceTests
 {
     private readonly Mock<IJournalEntryRepository> _repositoryMock = new();
+    private readonly Mock<IAccountingPeriodRepository> _accountingPeriodRepositoryMock = new();
     private readonly Mock<ITransactionLogService> _transactionLogServiceMock = new();
     private readonly JournalEntryService _service;
 
     public JournalEntryServiceTests()
     {
-        _service = new JournalEntryService(_repositoryMock.Object, _transactionLogServiceMock.Object);
+        _service = new JournalEntryService(
+            _repositoryMock.Object, 
+            _accountingPeriodRepositoryMock.Object, 
+            _transactionLogServiceMock.Object);
+        
+        // Configuramos por defecto que el periodo esté abierto para no romper pruebas existentes
+        _accountingPeriodRepositoryMock.Setup(r => r.IsPeriodOpenAsync(It.IsAny<int>(), It.IsAny<int>())).ReturnsAsync(true);
     }
 
     [Fact]
@@ -61,6 +68,28 @@ public class JournalEntryServiceTests
         Assert.NotNull(result);
         Assert.Equal(2, result.Lines.Count);
         _repositoryMock.Verify(r => r.AddAsync(It.IsAny<JournalEntry>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task CreateAsync_ShouldThrowException_WhenPeriodIsClosed()
+    {
+        // Arrange
+        var createDto = new CreateJournalEntryDto
+        {
+            Date = DateTime.UtcNow,
+            Description = "Test Entry",
+            Lines = new List<CreateJournalEntryLineDto>
+            {
+                new() { AccountId = Guid.NewGuid(), Debit = 100, Credit = 0 },
+                new() { AccountId = Guid.NewGuid(), Debit = 0, Credit = 100 }
+            }
+        };
+
+        _accountingPeriodRepositoryMock.Setup(r => r.IsPeriodOpenAsync(It.IsAny<int>(), It.IsAny<int>())).ReturnsAsync(false);
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<DomainException>(() => _service.CreateAsync(createDto));
+        Assert.Contains("No existe un periodo contable abierto", exception.Message);
     }
 
     [Fact]

@@ -1,4 +1,5 @@
 ﻿using SBC.Application.Models.Accounting;
+using SBC.Application.Models.Common;
 using SBC.Application.Services.Interfaces;
 using SBC.Domain.Entities.Accounting;
 using SBC.Domain.Entities.Enums;
@@ -24,6 +25,22 @@ public class JournalEntryLineService(
     {
         var lines = await repository.GetByJournalEntryIdAsync(journalEntryId);
         return lines.Select(MapToDto);
+    }
+
+    public async Task<PagedResultDto<JournalEntryLineDto>> GetPagedAsync(JournalEntryLineFilterDto filter)
+    {
+        var (items, totalCount) = await repository.GetPagedAsync(
+            filter.AccountId, filter.FromDate, filter.ToDate, filter.MinAmount, filter.MaxAmount, filter.PageNumber, filter.PageSize);
+
+        await transactionLogService.LogTransactionAsync(null, TransactionActions.GetJournalEntryLines, nameof(JournalEntryLine), null, TransactionStatus.Success, JsonSerializer.Serialize(filter));
+
+        return new PagedResultDto<JournalEntryLineDto>
+        {
+            Items = items.Select(MapToDto),
+            TotalCount = totalCount,
+            PageNumber = filter.PageNumber,
+            PageSize = filter.PageSize
+        };
     }
 
     public async Task<JournalEntryLineDto> CreateAsync(CreateJournalEntryLineForLineDto createDto)

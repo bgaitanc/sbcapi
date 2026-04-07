@@ -24,10 +24,10 @@ public class ReportsControllerTests
         var startDate = new DateTime(2026, 1, 1);
         var endDate = new DateTime(2026, 1, 31);
         var incomeStatement = new IncomeStatementDto { StartDate = startDate, EndDate = endDate, TotalRevenues = 1000 };
-        _serviceMock.Setup(s => s.GetIncomeStatementAsync(startDate, endDate)).ReturnsAsync(incomeStatement);
+        _serviceMock.Setup(s => s.GetIncomeStatementAsync(startDate, endDate, false)).ReturnsAsync(incomeStatement);
 
         // Act
-        var result = await _controller.GetIncomeStatement(startDate, endDate);
+        var result = await _controller.GetIncomeStatement(startDate, endDate, false);
 
         // Assert
         var actionResult = Assert.IsType<ActionResult<IncomeStatementDto>>(result);
@@ -43,10 +43,10 @@ public class ReportsControllerTests
         // Arrange
         var date = new DateTime(2026, 1, 31);
         var balanceSheet = new BalanceSheetDto { Date = date, TotalAssets = 5000 };
-        _serviceMock.Setup(s => s.GetBalanceSheetAsync(date)).ReturnsAsync(balanceSheet);
+        _serviceMock.Setup(s => s.GetBalanceSheetAsync(date, false)).ReturnsAsync(balanceSheet);
 
         // Act
-        var result = await _controller.GetBalanceSheet(date);
+        var result = await _controller.GetBalanceSheet(date, false);
 
         // Assert
         var actionResult = Assert.IsType<ActionResult<BalanceSheetDto>>(result);

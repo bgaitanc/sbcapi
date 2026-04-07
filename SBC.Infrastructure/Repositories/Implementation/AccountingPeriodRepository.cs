@@ -17,4 +17,9 @@ public class AccountingPeriodRepository(SbcDbContext context)
     {
         return await _dbSet.AnyAsync(p => p.Year == year && p.Month == month && p.IsClosed);
     }
+
+    public async Task<bool> IsPeriodOpenAsync(int year, int month)
+    {
+        return await _dbSet.AnyAsync(p => p.Year == year && p.Month == month && !p.IsClosed);
+    }
 }

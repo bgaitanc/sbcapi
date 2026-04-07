@@ -99,8 +99,8 @@ Authorization: Bearer {{auth_token}}
 
 ###
 
-# @name api/journalEntries/getAll
-GET {{SBC_HostAddress}}/api/journalEntries
+# @name api/journalEntries/getPaged
+GET {{SBC_HostAddress}}/api/journalEntries?pageNumber=1&pageSize=10&searchTerm=test&isPosted=false
 Authorization: Bearer {{auth_token}}
 
 ###
@@ -180,8 +180,14 @@ Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
 
 ###
 
-# @name api/bulkImports/getHistory
-GET {{SBC_HostAddress}}/api/bulkImports
+# @name api/bulkImports/getPagedHistory
+GET {{SBC_HostAddress}}/api/bulkImports?pageNumber=1&pageSize=10&fileName=test
+Authorization: Bearer {{auth_token}}
+
+###
+
+# @name api/journalEntryLines/getPaged
+GET {{SBC_HostAddress}}/api/journalEntryLines?pageNumber=1&pageSize=10&accountId=00000000-0000-0000-0000-000000000000
 Authorization: Bearer {{auth_token}}
 
 ###
@@ -233,13 +239,19 @@ Authorization: Bearer {{auth_token}}
 ###
 
 # @name api/reports/getIncomeStatement
-GET {{SBC_HostAddress}}/api/reports/income-statement?startDate=2024-01-01&endDate=2024-12-31
+GET {{SBC_HostAddress}}/api/reports/income-statement?startDate=2024-01-01&endDate=2024-12-31&includeUnposted=true
 Authorization: Bearer {{auth_token}}
 
 ###
 
 # @name api/reports/getBalanceSheet
-GET {{SBC_HostAddress}}/api/reports/balance-sheet?date=2024-12-31
+GET {{SBC_HostAddress}}/api/reports/balance-sheet?date=2024-12-31&includeUnposted=true
+Authorization: Bearer {{auth_token}}
+
+###
+
+# @name api/dashboard/summary
+GET {{SBC_HostAddress}}/api/dashboard/summary
 Authorization: Bearer {{auth_token}}
 
 ###

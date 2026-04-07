@@ -1,4 +1,6 @@
-﻿namespace SBC.Application.Models.Accounting;
+﻿using SBC.Application.Models.Common;
+
+namespace SBC.Application.Models.Accounting;
 
 /// <summary>
 /// Data transfer object for bulk import records.
@@ -12,4 +14,11 @@ public class BulkImportDto
     public int TotalCount { get; set; }
     public DateTime CreatedAt { get; set; }
     public string? CreatedBy { get; set; }
+}
+
+public class BulkImportFilterDto : BaseFilterDto
+{
+    public string? FileName { get; set; }
+    public DateTime? FromDate { get; set; }
+    public DateTime? ToDate { get; set; }
 }

@@ -7,4 +7,6 @@ namespace SBC.Domain.Repositories.Interfaces;
 /// </summary>
 public interface IBulkImportRepository : IBaseRepository<BulkImport>
 {
+    Task<(IEnumerable<BulkImport> Items, int TotalCount)> GetPagedAsync(
+        string? fileName, DateTime? fromDate, DateTime? toDate, int pageNumber, int pageSize);
 }

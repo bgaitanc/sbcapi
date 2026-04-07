@@ -1,4 +1,5 @@
 ﻿using SBC.Application.Models.Accounting;
+using SBC.Application.Models.Common;
 
 namespace SBC.Application.Services.Interfaces;
 
@@ -20,4 +21,11 @@ public interface IBulkImportService
     /// </summary>
     /// <returns>A collection of bulk import records.</returns>
     Task<IEnumerable<BulkImportDto>> GetHistoryAsync();
+
+    /// <summary>
+    /// Retrieves a paged and filtered history of bulk import operations.
+    /// </summary>
+    /// <param name="filter">The filter criteria.</param>
+    /// <returns>A paged result of bulk import records.</returns>
+    Task<PagedResultDto<BulkImportDto>> GetPagedHistoryAsync(BulkImportFilterDto filter);
 }

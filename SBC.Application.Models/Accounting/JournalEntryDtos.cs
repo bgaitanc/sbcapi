@@ -1,4 +1,6 @@
-﻿namespace SBC.Application.Models.Accounting;
+﻿using SBC.Application.Models.Common;
+
+namespace SBC.Application.Models.Accounting;
 
 public class JournalEntryDto
 {
@@ -14,6 +16,23 @@ public class JournalEntryDto
     public string? CreatedBy { get; set; }
     public DateTime? UpdatedAt { get; set; }
     public string? UpdatedBy { get; set; }
+}
+
+public class JournalEntryFilterDto : BaseFilterDto
+{
+    public string? SearchTerm { get; set; }
+    public DateTime? FromDate { get; set; }
+    public DateTime? ToDate { get; set; }
+    public bool? IsPosted { get; set; }
+}
+
+public class JournalEntryLineFilterDto : BaseFilterDto
+{
+    public Guid? AccountId { get; set; }
+    public DateTime? FromDate { get; set; }
+    public DateTime? ToDate { get; set; }
+    public decimal? MinAmount { get; set; }
+    public decimal? MaxAmount { get; set; }
 }
 
 public class JournalEntryLineDto

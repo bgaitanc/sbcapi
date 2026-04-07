@@ -42,13 +42,59 @@ public class JournalEntryRepository(SbcDbContext context) : BaseRepository<Journ
             .FirstOrDefaultAsync(j => j.Id == id);
     }
 
-    public async Task<IEnumerable<JournalEntry>> GetByDateRangeWithLinesAsync(DateTime startDate, DateTime endDate)
+    public async Task<IEnumerable<JournalEntry>> GetByDateRangeWithLinesAsync(DateTime startDate, DateTime endDate, bool includeUnposted = false)
     {
         return await _dbSet
             .Include(j => j.Lines)
                 .ThenInclude(l => l.Account)
-            .Where(j => j.Date >= startDate && j.Date <= endDate && j.IsPosted)
+            .Where(j => j.Date >= startDate && j.Date <= endDate && (j.IsPosted || includeUnposted))
             .OrderBy(j => j.Date)
             .ToListAsync();
+    }
+
+    public async Task<IEnumerable<JournalEntry>> GetRecentEntriesAsync(int count)
+    {
+        return await _dbSet
+            .Include(j => j.Lines)
+            .OrderByDescending(j => j.Date)
+            .ThenByDescending(j => j.Code)
+            .Take(count)
+            .ToListAsync();
+    }
+
+    public async Task<(IEnumerable<JournalEntry> Items, int TotalCount)> GetPagedAsync(
+        string? searchTerm, DateTime? fromDate, DateTime? toDate, bool? isPosted, int pageNumber, int pageSize)
+    {
+        var query = _dbSet.Include(j => j.Lines).AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(searchTerm))
+        {
+            query = query.Where(j => j.Description.Contains(searchTerm) || j.Code.Contains(searchTerm));
+        }
+
+        if (fromDate.HasValue)
+        {
+            query = query.Where(j => j.Date >= fromDate.Value);
+        }
+
+        if (toDate.HasValue)
+        {
+            query = query.Where(j => j.Date <= toDate.Value);
+        }
+
+        if (isPosted.HasValue)
+        {
+            query = query.Where(j => j.IsPosted == isPosted.Value);
+        }
+
+        var totalCount = await query.CountAsync();
+        var items = await query
+            .OrderByDescending(j => j.Date)
+            .ThenByDescending(j => j.Code)
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+
+        return (items, totalCount);
     }
 }

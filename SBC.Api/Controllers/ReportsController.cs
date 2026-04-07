@@ -12,14 +12,14 @@ namespace SBC.Api.Controllers;
 public class ReportsController(IFinancialReportService service) : SbcControllerBase
 {
     [HttpGet("income-statement")]
-    public async Task<ActionResult<IncomeStatementDto>> GetIncomeStatement([FromQuery] DateTime startDate, [FromQuery] DateTime endDate)
+    public async Task<ActionResult<IncomeStatementDto>> GetIncomeStatement([FromQuery] DateTime startDate, [FromQuery] DateTime endDate, [FromQuery] bool includeUnposted = false)
     {
-        return await ExecuteServiceAsync(() => service.GetIncomeStatementAsync(startDate, endDate));
+        return await ExecuteServiceAsync(() => service.GetIncomeStatementAsync(startDate, endDate, includeUnposted));
     }
 
     [HttpGet("balance-sheet")]
-    public async Task<ActionResult<BalanceSheetDto>> GetBalanceSheet([FromQuery] DateTime date)
+    public async Task<ActionResult<BalanceSheetDto>> GetBalanceSheet([FromQuery] DateTime date, [FromQuery] bool includeUnposted = false)
     {
-        return await ExecuteServiceAsync(() => service.GetBalanceSheetAsync(date));
+        return await ExecuteServiceAsync(() => service.GetBalanceSheetAsync(date, includeUnposted));
     }
 }

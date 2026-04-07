@@ -3,11 +3,10 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SBC.Api.Controllers.Base;
 using SBC.Application.Models.Accounting;
+using SBC.Application.Models.Common;
 using SBC.Application.Services.Interfaces;
 using SBC.Domain.Entities.Accounting;
 using SBC.Domain.Exceptions;
-
-using SBC.Domain.Entities.Accounting;
 using SBC.Domain.Entities.Logging;
 
 namespace SBC.Api.Controllers;
@@ -17,6 +16,12 @@ namespace SBC.Api.Controllers;
 [Route("api/[controller]")]
 public class JournalEntryLinesController(IJournalEntryLineService service) : SbcControllerBase
 {
+    [HttpGet]
+    public async Task<ActionResult<PagedResultDto<JournalEntryLineDto>>> GetPaged([FromQuery] JournalEntryLineFilterDto filter)
+    {
+        return await ExecuteServiceAsync(() => service.GetPagedAsync(filter), HttpStatusCode.OK, TransactionActions.GetJournalEntryLines, nameof(JournalEntryLine), filter);
+    }
+
     [HttpGet("{id:guid}")]
     public async Task<ActionResult<JournalEntryLineDto>> GetById(Guid id)
     {

@@ -60,3 +60,16 @@
   ```csharp
   return await ExecuteServiceAsync(() => _service.GetData(id), HttpStatusCode.OK, TransactionActions.GetData, nameof(Entity), new { id });
   ```
+
+### 9. Pagination and Filtering
+- All GET endpoints for collections (Journal Entries, Lines, Bulk Imports, etc.) MUST support pagination and filtering.
+- Use `BaseFilterDto` as a base for filter DTOs.
+- Repositories should implement a `GetPagedAsync` method that returns a tuple `(IEnumerable<T> Items, int TotalCount)`.
+- Services should return `PagedResultDto<T>`.
+
+### 10. Accounting Period Validation
+- Before creating or updating any `JournalEntry` (manually or via bulk import), always verify that the accounting period for the entry date exists and is open using `IAccountingPeriodRepository.IsPeriodOpenAsync`.
+
+### 11. Live/Provisional Financial Reports
+- Financial reports (Income Statement, Balance Sheet) and Dashboard data should support an `includeUnposted` flag.
+- When `includeUnposted` is `true`, the system MUST include non-posted (`IsPosted = false`) journal entries in calculations to provide a real-time view of the accounting state.

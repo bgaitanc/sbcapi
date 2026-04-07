@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SBC.Api.Controllers.Base;
 using SBC.Application.Models.Accounting;
+using SBC.Application.Models.Common;
 using SBC.Application.Services.Interfaces;
 using SBC.Domain.Entities.Accounting;
 using SBC.Domain.Exceptions;
@@ -17,9 +18,9 @@ namespace SBC.Api.Controllers;
 public class JournalEntriesController(IJournalEntryService service) : SbcControllerBase
 {
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<JournalEntryDto>>> GetAll()
+    public async Task<ActionResult<PagedResultDto<JournalEntryDto>>> GetPaged([FromQuery] JournalEntryFilterDto filter)
     {
-        return await ExecuteServiceAsync(() => service.GetAllAsync(), HttpStatusCode.OK, TransactionActions.GetJournalEntries, nameof(JournalEntry));
+        return await ExecuteServiceAsync(() => service.GetPagedAsync(filter), HttpStatusCode.OK, TransactionActions.GetJournalEntries, nameof(JournalEntry), filter);
     }
 
     [HttpGet("{id:guid}")]

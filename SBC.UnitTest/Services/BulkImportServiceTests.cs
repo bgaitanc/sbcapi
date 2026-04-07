@@ -11,6 +11,7 @@ public class BulkImportServiceTests
     private readonly Mock<IBulkImportRepository> _repositoryMock = new();
     private readonly Mock<IJournalEntryRepository> _journalEntryRepositoryMock = new();
     private readonly Mock<IAccountRepository> _accountRepositoryMock = new();
+    private readonly Mock<IAccountingPeriodRepository> _accountingPeriodRepositoryMock = new();
     private readonly Mock<ITransactionLogService> _transactionLogServiceMock = new();
     private readonly BulkImportService _service;
 
@@ -20,7 +21,10 @@ public class BulkImportServiceTests
             _repositoryMock.Object, 
             _journalEntryRepositoryMock.Object, 
             _accountRepositoryMock.Object,
+            _accountingPeriodRepositoryMock.Object,
             _transactionLogServiceMock.Object);
+        
+        _accountingPeriodRepositoryMock.Setup(r => r.IsPeriodOpenAsync(It.IsAny<int>(), It.IsAny<int>())).ReturnsAsync(true);
     }
 
     [Fact]

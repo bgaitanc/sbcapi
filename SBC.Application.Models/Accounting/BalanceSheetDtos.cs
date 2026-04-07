@@ -3,6 +3,7 @@
 public class BalanceSheetDto
 {
     public DateTime Date { get; set; }
+    public bool IsProvisional { get; set; }
     public List<BalanceSheetLineDto> Assets { get; set; } = [];
     public decimal TotalAssets { get; set; }
     public List<BalanceSheetLineDto> Liabilities { get; set; } = [];

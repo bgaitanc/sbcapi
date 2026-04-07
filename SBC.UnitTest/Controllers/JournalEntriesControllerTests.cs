@@ -4,6 +4,7 @@ using Moq;
 using SBC.Api.Controllers;
 using SBC.Api.Controllers.Base;
 using SBC.Application.Models.Accounting;
+using SBC.Application.Models.Common;
 using SBC.Application.Services.Interfaces;
 
 namespace SBC.UnitTest.Controllers;
@@ -19,21 +20,28 @@ public class JournalEntriesControllerTests
     }
 
     [Fact]
-    public async Task GetAll_ShouldReturnOk()
+    public async Task GetPaged_ShouldReturnOk()
     {
         // Arrange
-        var entries = new List<JournalEntryDto> { new() { Id = Guid.NewGuid(), Description = "Test Entry" } };
-        _serviceMock.Setup(s => s.GetAllAsync()).ReturnsAsync(entries);
+        var filter = new JournalEntryFilterDto { PageNumber = 1, PageSize = 10 };
+        var pagedResult = new PagedResultDto<JournalEntryDto> 
+        { 
+            Items = new List<JournalEntryDto> { new() { Id = Guid.NewGuid(), Description = "Test Entry" } },
+            TotalCount = 1,
+            PageNumber = 1,
+            PageSize = 10
+        };
+        _serviceMock.Setup(s => s.GetPagedAsync(filter)).ReturnsAsync(pagedResult);
 
         // Act
-        var result = await _controller.GetAll();
+        var result = await _controller.GetPaged(filter);
 
         // Assert
-        var actionResult = Assert.IsType<ActionResult<IEnumerable<JournalEntryDto>>>(result);
+        var actionResult = Assert.IsType<ActionResult<PagedResultDto<JournalEntryDto>>>(result);
         var objectResult = Assert.IsType<OkObjectResult>(actionResult.Result);
-        var response = Assert.IsType<SbcGenericResponse<IEnumerable<JournalEntryDto>>>(objectResult.Value);
+        var response = Assert.IsType<SbcGenericResponse<PagedResultDto<JournalEntryDto>>>(objectResult.Value);
         Assert.True(response.Success);
-        Assert.Equal(entries, response.Data);
+        Assert.Equal(pagedResult, response.Data);
     }
 
     [Fact]

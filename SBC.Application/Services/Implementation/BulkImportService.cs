@@ -1,5 +1,6 @@
 ﻿using ClosedXML.Excel;
 using SBC.Application.Models.Accounting;
+using SBC.Application.Models.Common;
 using SBC.Application.Services.Interfaces;
 using SBC.Domain.Entities.Accounting;
 using SBC.Domain.Entities.Enums;
@@ -16,6 +17,7 @@ public class BulkImportService(
     IBulkImportRepository repository,
     IJournalEntryRepository journalEntryRepository,
     IAccountRepository accountRepository,
+    IAccountingPeriodRepository accountingPeriodRepository,
     ITransactionLogService transactionLogService) : IBulkImportService
 {
     public async Task<BulkJournalEntryImportResultDto> ImportFromExcelAsync(Stream excelStream, string fileName)
@@ -52,6 +54,12 @@ public class BulkImportService(
                 var debit = row.Cell(4).GetValue<decimal>();
                 var credit = row.Cell(5).GetValue<decimal>();
                 var groupRef = row.Cell(6).GetString();
+
+                if (!await accountingPeriodRepository.IsPeriodOpenAsync(date.Year, date.Month))
+                {
+                    result.Errors.Add($"Fila {rowNumber}: No existe un periodo contable abierto para {date:MMMM yyyy}.");
+                    continue;
+                }
 
                 if (string.IsNullOrWhiteSpace(accountCode))
                 {
@@ -169,6 +177,31 @@ public class BulkImportService(
             CreatedAt = i.CreatedAt,
             CreatedBy = i.CreatedBy
         }).OrderByDescending(i => i.CreatedAt);
+    }
+
+    public async Task<PagedResultDto<BulkImportDto>> GetPagedHistoryAsync(BulkImportFilterDto filter)
+    {
+        var (items, totalCount) = await repository.GetPagedAsync(
+            filter.FileName, filter.FromDate, filter.ToDate, filter.PageNumber, filter.PageSize);
+
+        await transactionLogService.LogTransactionAsync(null, TransactionActions.GetBulkImports, nameof(BulkImport), null, TransactionStatus.Success, JsonSerializer.Serialize(filter));
+
+        return new PagedResultDto<BulkImportDto>
+        {
+            Items = items.Select(i => new BulkImportDto
+            {
+                Id = i.Id,
+                FileName = i.FileName,
+                SuccessCount = i.SuccessCount,
+                ErrorCount = i.ErrorCount,
+                TotalCount = i.TotalCount,
+                CreatedAt = i.CreatedAt,
+                CreatedBy = i.CreatedBy
+            }),
+            TotalCount = totalCount,
+            PageNumber = filter.PageNumber,
+            PageSize = filter.PageSize
+        };
     }
 
     private async Task<string> GenerateCodeAsync(int year, int month, List<JournalEntry> currentList)

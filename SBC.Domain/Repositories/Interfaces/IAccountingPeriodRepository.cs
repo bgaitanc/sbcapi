@@ -6,4 +6,5 @@ public interface IAccountingPeriodRepository : IBaseRepository<AccountingPeriod>
 {
     Task<AccountingPeriod?> GetByPeriodAsync(int year, int month);
     Task<bool> IsPeriodClosedAsync(int year, int month);
+    Task<bool> IsPeriodOpenAsync(int year, int month);
 }

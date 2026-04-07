@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SBC.Api.Controllers.Base;
 using SBC.Application.Models.Accounting;
+using SBC.Application.Models.Common;
 using SBC.Application.Services.Interfaces;
 
 using SBC.Domain.Entities.Accounting;
@@ -19,13 +20,14 @@ namespace SBC.Api.Controllers;
 public class BulkImportsController(IBulkImportService service) : SbcControllerBase
 {
     /// <summary>
-    /// Retrieves the history of bulk journal entry imports.
+    /// Retrieves a paged and filtered history of bulk journal entry imports.
     /// </summary>
-    /// <returns>A collection of bulk import records.</returns>
+    /// <param name="filter">The filter criteria.</param>
+    /// <returns>A paged result of bulk import records.</returns>
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<BulkImportDto>>> GetHistory()
+    public async Task<ActionResult<PagedResultDto<BulkImportDto>>> GetPagedHistory([FromQuery] BulkImportFilterDto filter)
     {
-        return await ExecuteServiceAsync(() => service.GetHistoryAsync(), HttpStatusCode.OK, TransactionActions.GetBulkImports, nameof(BulkImport));
+        return await ExecuteServiceAsync(() => service.GetPagedHistoryAsync(filter), HttpStatusCode.OK, TransactionActions.GetBulkImports, nameof(BulkImport), filter);
     }
 
     /// <summary>

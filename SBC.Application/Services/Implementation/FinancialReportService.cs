@@ -11,15 +11,16 @@ public class FinancialReportService(
     IJournalEntryRepository journalEntryRepository,
     ITransactionLogService transactionLogService) : IFinancialReportService
 {
-    public async Task<IncomeStatementDto> GetIncomeStatementAsync(DateTime startDate, DateTime endDate)
+    public async Task<IncomeStatementDto> GetIncomeStatementAsync(DateTime startDate, DateTime endDate, bool includeUnposted = false)
     {
-        var entries = await journalEntryRepository.GetByDateRangeWithLinesAsync(startDate, endDate);
+        var entries = await journalEntryRepository.GetByDateRangeWithLinesAsync(startDate, endDate, includeUnposted);
         var allLines = entries.SelectMany(e => e.Lines).ToList();
 
         var report = new IncomeStatementDto
         {
             StartDate = startDate,
-            EndDate = endDate
+            EndDate = endDate,
+            IsProvisional = includeUnposted
         };
 
         // Revenues
@@ -76,19 +77,20 @@ public class FinancialReportService(
         report.Expenses = expenseLines;
         report.TotalExpenses = expenseLines.Sum(e => e.Amount);
 
-        await transactionLogService.LogTransactionAsync(null, TransactionActions.GenerateIncomeStatement, nameof(IncomeStatementDto), null, TransactionStatus.Success, JsonSerializer.Serialize(new { startDate, endDate }));
+        await transactionLogService.LogTransactionAsync(null, TransactionActions.GenerateIncomeStatement, nameof(IncomeStatementDto), null, TransactionStatus.Success, JsonSerializer.Serialize(new { startDate, endDate, includeUnposted }));
 
         return report;
     }
 
-    public async Task<BalanceSheetDto> GetBalanceSheetAsync(DateTime date)
+    public async Task<BalanceSheetDto> GetBalanceSheetAsync(DateTime date, bool includeUnposted = false)
     {
-        var entries = await journalEntryRepository.GetByDateRangeWithLinesAsync(DateTime.MinValue, date);
+        var entries = await journalEntryRepository.GetByDateRangeWithLinesAsync(DateTime.MinValue, date, includeUnposted);
         var allLines = entries.SelectMany(e => e.Lines).ToList();
 
         var report = new BalanceSheetDto
         {
-            Date = date
+            Date = date,
+            IsProvisional = includeUnposted
         };
 
         // Assets
@@ -151,7 +153,7 @@ public class FinancialReportService(
         var expenses = allLines.Where(l => l.Account.Type == AccountType.Expense).Sum(l => l.Debit - l.Credit);
         report.NetIncome = revenue - costs - expenses;
 
-        await transactionLogService.LogTransactionAsync(null, TransactionActions.GenerateBalanceSheet, nameof(BalanceSheetDto), null, TransactionStatus.Success, JsonSerializer.Serialize(new { date }));
+        await transactionLogService.LogTransactionAsync(null, TransactionActions.GenerateBalanceSheet, nameof(BalanceSheetDto), null, TransactionStatus.Success, JsonSerializer.Serialize(new { date, includeUnposted }));
 
         return report;
     }
