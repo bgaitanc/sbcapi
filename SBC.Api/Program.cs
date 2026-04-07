@@ -84,6 +84,8 @@ builder.Services.AddScoped<IAccountingPeriodRepository, AccountingPeriodReposito
 builder.Services.AddScoped<IAccountingPeriodService, AccountingPeriodService>();
 builder.Services.AddScoped<IBulkImportRepository, BulkImportRepository>();
 builder.Services.AddScoped<IBulkImportService, BulkImportService>();
+builder.Services.AddScoped<ITransactionLogRepository, TransactionLogRepository>();
+builder.Services.AddScoped<ITransactionLogService, TransactionLogService>();
 
 builder.Services.AddCors(options =>
 {

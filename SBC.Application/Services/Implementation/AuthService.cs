@@ -10,25 +10,33 @@ using SBC.Application.Models.Auth;
 using SBC.Application.Services.Interfaces;
 using SBC.Domain.Entities.Identity;
 using SBC.Domain.Exceptions;
+using System.Text.Json;
 
 namespace SBC.Application.Services.Implementation;
 
 public class AuthService(
     UserManager<ApplicationUser> userManager,
-    IConfiguration configuration)
+    IConfiguration configuration,
+    ITransactionLogService transactionLogService)
     : IAuthService
 {
     public async Task<Guid> RegisterUserAsync(RegisterDto registerDto)
     {
         var emailExists = await userManager.FindByEmailAsync(registerDto.Email);
         if (emailExists != null)
-            throw new SbcException(HttpStatusCode.PreconditionFailed,
-                "El correo electrónico ya está registrado.");
+        {
+            var error = "El correo electrónico ya está registrado.";
+            await transactionLogService.LogTransactionAsync(null, "RegisterUser", "User", null, "ValidationError", JsonSerializer.Serialize(new { registerDto.UserName, registerDto.Email }), error);
+            throw new SbcException(HttpStatusCode.PreconditionFailed, error);
+        }
 
         var userNameExists = await userManager.FindByNameAsync(registerDto.UserName);
         if (userNameExists != null)
-            throw new SbcException(HttpStatusCode.PreconditionFailed,
-                "El nombre de usuario ya está registrado.");
+        {
+            var error = "El nombre de usuario ya está registrado.";
+            await transactionLogService.LogTransactionAsync(null, "RegisterUser", "User", null, "ValidationError", JsonSerializer.Serialize(new { registerDto.UserName, registerDto.Email }), error);
+            throw new SbcException(HttpStatusCode.PreconditionFailed, error);
+        }
 
         var user = new ApplicationUser
         {
@@ -43,10 +51,13 @@ public class AuthService(
         if (!result.Succeeded)
         {
             var errors = string.Join(", ", result.Errors.Select(e => e.Description));
-            throw new SbcException(HttpStatusCode.PreconditionFailed, $"Error al registrar usuario: {errors}");
+            var error = $"Error al registrar usuario: {errors}";
+            await transactionLogService.LogTransactionAsync(null, "RegisterUser", "User", null, "Failure", JsonSerializer.Serialize(new { registerDto.UserName, registerDto.Email }), error);
+            throw new SbcException(HttpStatusCode.PreconditionFailed, error);
         }
 
         await userManager.AddToRoleAsync(user, "Guest");
+        await transactionLogService.LogTransactionAsync(user.Id, "RegisterUser", "User", user.Id.ToString(), "Success", JsonSerializer.Serialize(new { registerDto.UserName, registerDto.Email }));
 
         return user.Id;
     }
@@ -57,7 +68,9 @@ public class AuthService(
 
         if (user == null || !await userManager.CheckPasswordAsync(user, loginDto.Password))
         {
-            throw new SbcException(HttpStatusCode.Unauthorized, "Credenciales inválidas.");
+            var error = "Credenciales inválidas.";
+            await transactionLogService.LogTransactionAsync(null, "Login", "User", null, "Failure", JsonSerializer.Serialize(new { loginDto.UserName }), error);
+            throw new SbcException(HttpStatusCode.Unauthorized, error);
         }
 
         var accessToken = await GenerateJwtToken(user);
@@ -66,6 +79,8 @@ public class AuthService(
         await UpdateUserRefreshToken(user, refreshToken);
 
         var roles = await userManager.GetRolesAsync(user);
+
+        await transactionLogService.LogTransactionAsync(user.Id, "Login", "User", user.Id.ToString(), "Success", JsonSerializer.Serialize(new { loginDto.UserName }));
 
         return new AuthResponseDto(
             UserName: user.UserName!,
@@ -81,17 +96,28 @@ public class AuthService(
     {
         var principal = GetPrincipalFromExpiredToken(request.Token);
         if (principal == null)
-            throw new SbcException(HttpStatusCode.Unauthorized, "Token inválido.");
+        {
+            var error = "Token inválido.";
+            await transactionLogService.LogTransactionAsync(null, "RefreshToken", "User", null, "Failure", null, error);
+            throw new SbcException(HttpStatusCode.Unauthorized, error);
+        }
 
         var userId = principal.FindFirst(JwtRegisteredClaimNames.Sub)?.Value
                      ?? principal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-        if (userId == null) throw new SbcException(HttpStatusCode.Unauthorized, "Token inválido.");
+        if (userId == null)
+        {
+            var error = "Token inválido (no user id).";
+            await transactionLogService.LogTransactionAsync(null, "RefreshToken", "User", null, "Failure", null, error);
+            throw new SbcException(HttpStatusCode.Unauthorized, "Token inválido.");
+        }
 
         var user = await userManager.FindByIdAsync(userId);
         if (user == null || user.RefreshToken != request.RefreshToken || user.RefreshTokenExpiryTime <= DateTime.UtcNow)
         {
-            throw new SbcException(HttpStatusCode.Unauthorized, "Refresh token inválido o expirado.");
+            var error = "Refresh token inválido o expirado.";
+            await transactionLogService.LogTransactionAsync(user?.Id, "RefreshToken", "User", user?.Id.ToString(), "Failure", null, error);
+            throw new SbcException(HttpStatusCode.Unauthorized, error);
         }
 
         var newAccessToken = await GenerateJwtToken(user);
@@ -100,6 +126,8 @@ public class AuthService(
         await UpdateUserRefreshToken(user, newRefreshToken);
 
         var roles = await userManager.GetRolesAsync(user);
+
+        await transactionLogService.LogTransactionAsync(user.Id, "RefreshToken", "User", user.Id.ToString(), "Success");
 
         return new AuthResponseDto(
             UserName: user.UserName!,

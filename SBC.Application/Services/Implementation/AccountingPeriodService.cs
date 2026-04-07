@@ -3,6 +3,7 @@ using SBC.Application.Services.Interfaces;
 using SBC.Domain.Entities.Accounting;
 using SBC.Domain.Exceptions;
 using SBC.Domain.Repositories.Interfaces;
+using System.Text.Json;
 
 namespace SBC.Application.Services.Implementation;
 
@@ -10,7 +11,8 @@ public class AccountingPeriodService(
     IAccountingPeriodRepository periodRepository,
     IJournalEntryRepository journalEntryRepository,
     IFinancialReportService financialReportService,
-    IAccountRepository accountRepository) : IAccountingPeriodService
+    IAccountRepository accountRepository,
+    ITransactionLogService transactionLogService) : IAccountingPeriodService
 {
     public async Task<AccountingPeriodDto> ClosePeriodAsync(int year, int month, Guid equityAccountId)
     {
@@ -18,13 +20,17 @@ public class AccountingPeriodService(
         var period = await periodRepository.GetByPeriodAsync(year, month);
         if (period != null && period.IsClosed)
         {
-            throw new DomainException($"El período {month}/{year} ya se encuentra cerrado.");
+            var error = $"El período {month}/{year} ya se encuentra cerrado.";
+            await transactionLogService.LogTransactionAsync(null, "CloseAccountingPeriod", "AccountingPeriod", null, "ValidationError", JsonSerializer.Serialize(new { year, month, equityAccountId }), error);
+            throw new DomainException(error);
         }
 
         // 2. Verificar que la cuenta de patrimonio exista
         var equityAccount = await accountRepository.GetByIdAsync(equityAccountId);
         if (equityAccount == null)
         {
+            var error = $"Account with id {equityAccountId} was not found.";
+            await transactionLogService.LogTransactionAsync(null, "CloseAccountingPeriod", "AccountingPeriod", null, "Failure", JsonSerializer.Serialize(new { year, month, equityAccountId }), error);
             throw new NotFoundException(nameof(Account), equityAccountId);
         }
 
@@ -46,7 +52,9 @@ public class AccountingPeriodService(
         if (incomeStatement.NetIncome == 0 && !incomeStatement.Revenues.Any() && !incomeStatement.Costs.Any() && !incomeStatement.Expenses.Any())
         {
             // No hay nada que cerrar, pero marcamos el periodo como cerrado
-            return await MarkAsClosed(period, year, month, null);
+            var result = await MarkAsClosed(period, year, month, null);
+            await transactionLogService.LogTransactionAsync(null, "CloseAccountingPeriod", "AccountingPeriod", result.Id.ToString(), "Success", JsonSerializer.Serialize(new { year, month, equityAccountId }));
+            return result;
         }
 
         // 5. Generar Asiento de Cierre
@@ -123,14 +131,18 @@ public class AccountingPeriodService(
 
         if (!closingEntry.ValidateDoubleEntry())
         {
-            throw new DomainException("Error al generar el asiento de cierre: No cumple con la partida doble.");
+            var error = "Error al generar el asiento de cierre: No cumple con la partida doble.";
+            await transactionLogService.LogTransactionAsync(null, "CloseAccountingPeriod", "AccountingPeriod", null, "ValidationError", JsonSerializer.Serialize(new { year, month, equityAccountId }), error);
+            throw new DomainException(error);
         }
 
         closingEntry.Code = await GenerateClosingCodeAsync(year, month);
         var createdEntry = await journalEntryRepository.AddAsync(closingEntry);
 
         // 6. Marcar periodo como cerrado
-        return await MarkAsClosed(period, year, month, createdEntry.Id);
+        var closedPeriod = await MarkAsClosed(period, year, month, createdEntry.Id);
+        await transactionLogService.LogTransactionAsync(null, "CloseAccountingPeriod", "AccountingPeriod", closedPeriod.Id.ToString(), "Success", JsonSerializer.Serialize(new { year, month, equityAccountId }));
+        return closedPeriod;
     }
 
     public async Task<IEnumerable<AccountingPeriodDto>> GetAllPeriodsAsync()
@@ -150,7 +162,9 @@ public class AccountingPeriodService(
         var existingPeriod = await periodRepository.GetByPeriodAsync(year, month);
         if (existingPeriod != null)
         {
-            throw new DomainException($"El período {month}/{year} ya existe.");
+            var error = $"El período {month}/{year} ya existe.";
+            await transactionLogService.LogTransactionAsync(null, "CreateAccountingPeriod", "AccountingPeriod", null, "ValidationError", JsonSerializer.Serialize(new { year, month }), error);
+            throw new DomainException(error);
         }
 
         var period = new AccountingPeriod
@@ -162,6 +176,7 @@ public class AccountingPeriodService(
         };
 
         var createdPeriod = await periodRepository.AddAsync(period);
+        await transactionLogService.LogTransactionAsync(null, "CreateAccountingPeriod", "AccountingPeriod", createdPeriod.Id.ToString(), "Success", JsonSerializer.Serialize(new { year, month }));
         return MapToDto(createdPeriod);
     }
 

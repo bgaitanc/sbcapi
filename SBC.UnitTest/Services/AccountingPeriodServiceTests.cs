@@ -14,6 +14,7 @@ public class AccountingPeriodServiceTests
     private readonly Mock<IJournalEntryRepository> _journalRepoMock = new();
     private readonly Mock<IFinancialReportService> _reportServiceMock = new();
     private readonly Mock<IAccountRepository> _accountRepoMock = new();
+    private readonly Mock<ITransactionLogService> _transactionLogServiceMock = new();
     private readonly AccountingPeriodService _service;
 
     public AccountingPeriodServiceTests()
@@ -22,7 +23,8 @@ public class AccountingPeriodServiceTests
             _periodRepoMock.Object,
             _journalRepoMock.Object,
             _reportServiceMock.Object,
-            _accountRepoMock.Object);
+            _accountRepoMock.Object,
+            _transactionLogServiceMock.Object);
     }
 
     [Fact]

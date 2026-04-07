@@ -4,6 +4,7 @@ using Microsoft.Extensions.Configuration;
 using Moq;
 using SBC.Application.Models.Auth;
 using SBC.Application.Services.Implementation;
+using SBC.Application.Services.Interfaces;
 using SBC.Domain.Entities.Identity;
 using SBC.Domain.Exceptions;
 
@@ -13,6 +14,7 @@ public class AuthServiceTests
 {
     private readonly Mock<UserManager<ApplicationUser>> _userManagerMock;
     private readonly Mock<IConfiguration> _configMock;
+    private readonly Mock<ITransactionLogService> _transactionLogServiceMock = new();
     private readonly AuthService _service;
 
     public AuthServiceTests()
@@ -20,7 +22,7 @@ public class AuthServiceTests
         var store = new Mock<IUserStore<ApplicationUser>>();
         _userManagerMock = new Mock<UserManager<ApplicationUser>>(store.Object, null!, null!, null!, null!, null!, null!, null!, null!);
         _configMock = new Mock<IConfiguration>();
-        _service = new AuthService(_userManagerMock.Object, _configMock.Object);
+        _service = new AuthService(_userManagerMock.Object, _configMock.Object, _transactionLogServiceMock.Object);
     }
 
     [Fact]

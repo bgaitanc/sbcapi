@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore.ChangeTracking;
 using SBC.Domain.Entities.Accounting;
 using SBC.Domain.Entities.Base;
 using SBC.Domain.Entities.Identity;
+using SBC.Domain.Entities.Logging;
 using SBC.Infrastructure.Database.Seeder;
 
 namespace SBC.Infrastructure.Database;
@@ -18,6 +19,7 @@ public class SbcDbContext(DbContextOptions<SbcDbContext> options, IHttpContextAc
     public DbSet<JournalEntryLine> JournalEntryLines { get; set; }
     public DbSet<AccountingPeriod> AccountingPeriods { get; set; }
     public DbSet<BulkImport> BulkImports { get; set; }
+    public DbSet<TransactionLog> TransactionLogs { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

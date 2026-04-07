@@ -2,6 +2,7 @@
 using Moq;
 using SBC.Application.Models.Accounting;
 using SBC.Application.Services.Implementation;
+using SBC.Application.Services.Interfaces;
 using SBC.Domain.Entities.Accounting;
 using SBC.Domain.Entities.Enums;
 using SBC.Domain.Exceptions;
@@ -12,11 +13,12 @@ namespace SBC.UnitTest.Services;
 public class AccountServiceTests
 {
     private readonly Mock<IAccountRepository> _accountRepoMock = new();
+    private readonly Mock<ITransactionLogService> _transactionLogServiceMock = new();
     private readonly AccountService _service;
 
     public AccountServiceTests()
     {
-        _service = new AccountService(_accountRepoMock.Object);
+        _service = new AccountService(_accountRepoMock.Object, _transactionLogServiceMock.Object);
     }
 
     [Fact]

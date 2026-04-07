@@ -2,10 +2,13 @@
 using SBC.Application.Services.Interfaces;
 using SBC.Domain.Entities.Enums;
 using SBC.Domain.Repositories.Interfaces;
+using System.Text.Json;
 
 namespace SBC.Application.Services.Implementation;
 
-public class FinancialReportService(IJournalEntryRepository journalEntryRepository) : IFinancialReportService
+public class FinancialReportService(
+    IJournalEntryRepository journalEntryRepository,
+    ITransactionLogService transactionLogService) : IFinancialReportService
 {
     public async Task<IncomeStatementDto> GetIncomeStatementAsync(DateTime startDate, DateTime endDate)
     {
@@ -71,6 +74,8 @@ public class FinancialReportService(IJournalEntryRepository journalEntryReposito
 
         report.Expenses = expenseLines;
         report.TotalExpenses = expenseLines.Sum(e => e.Amount);
+
+        await transactionLogService.LogTransactionAsync(null, "GenerateIncomeStatement", "Report", null, "Success", JsonSerializer.Serialize(new { startDate, endDate }));
 
         return report;
     }
@@ -144,6 +149,8 @@ public class FinancialReportService(IJournalEntryRepository journalEntryReposito
         var costs = allLines.Where(l => l.Account.Type == AccountType.Cost).Sum(l => l.Debit - l.Credit);
         var expenses = allLines.Where(l => l.Account.Type == AccountType.Expense).Sum(l => l.Debit - l.Credit);
         report.NetIncome = revenue - costs - expenses;
+
+        await transactionLogService.LogTransactionAsync(null, "GenerateBalanceSheet", "Report", null, "Success", JsonSerializer.Serialize(new { date }));
 
         return report;
     }

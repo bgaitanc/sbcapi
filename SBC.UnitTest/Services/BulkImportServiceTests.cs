@@ -1,5 +1,6 @@
 ﻿using Moq;
 using SBC.Application.Services.Implementation;
+using SBC.Application.Services.Interfaces;
 using SBC.Domain.Entities.Accounting;
 using SBC.Domain.Repositories.Interfaces;
 
@@ -10,6 +11,7 @@ public class BulkImportServiceTests
     private readonly Mock<IBulkImportRepository> _repositoryMock = new();
     private readonly Mock<IJournalEntryRepository> _journalEntryRepositoryMock = new();
     private readonly Mock<IAccountRepository> _accountRepositoryMock = new();
+    private readonly Mock<ITransactionLogService> _transactionLogServiceMock = new();
     private readonly BulkImportService _service;
 
     public BulkImportServiceTests()
@@ -17,7 +19,8 @@ public class BulkImportServiceTests
         _service = new BulkImportService(
             _repositoryMock.Object, 
             _journalEntryRepositoryMock.Object, 
-            _accountRepositoryMock.Object);
+            _accountRepositoryMock.Object,
+            _transactionLogServiceMock.Object);
     }
 
     [Fact]

@@ -1,5 +1,6 @@
 ﻿using Moq;
 using SBC.Application.Services.Implementation;
+using SBC.Application.Services.Interfaces;
 using SBC.Domain.Entities.Accounting;
 using SBC.Domain.Entities.Enums;
 using SBC.Domain.Repositories.Interfaces;
@@ -8,6 +9,8 @@ namespace SBC.UnitTest.Services;
 
 public class FinancialReportServiceTests
 {
+    private readonly Mock<ITransactionLogService> _transactionLogServiceMock = new();
+
     [Fact]
     public async Task GetIncomeStatementAsync_ShouldCalculateCorrectly()
     {
@@ -55,7 +58,7 @@ public class FinancialReportServiceTests
         mockRepo.Setup(r => r.GetByDateRangeWithLinesAsync(startDate, endDate))
             .ReturnsAsync(entries);
 
-        var service = new FinancialReportService(mockRepo.Object);
+        var service = new FinancialReportService(mockRepo.Object, _transactionLogServiceMock.Object);
 
         // Act
         var result = await service.GetIncomeStatementAsync(startDate, endDate);
@@ -122,7 +125,7 @@ public class FinancialReportServiceTests
         mockRepo.Setup(r => r.GetByDateRangeWithLinesAsync(DateTime.MinValue, date))
             .ReturnsAsync(entries);
 
-        var service = new FinancialReportService(mockRepo.Object);
+        var service = new FinancialReportService(mockRepo.Object, _transactionLogServiceMock.Object);
 
         // Act
         var result = await service.GetBalanceSheetAsync(date);

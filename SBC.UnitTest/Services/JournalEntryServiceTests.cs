@@ -1,6 +1,7 @@
 ﻿using Moq;
 using SBC.Application.Models.Accounting;
 using SBC.Application.Services.Implementation;
+using SBC.Application.Services.Interfaces;
 using SBC.Domain.Entities.Accounting;
 using SBC.Domain.Exceptions;
 using SBC.Domain.Repositories.Interfaces;
@@ -10,11 +11,12 @@ namespace SBC.UnitTest.Services;
 public class JournalEntryServiceTests
 {
     private readonly Mock<IJournalEntryRepository> _repositoryMock = new();
+    private readonly Mock<ITransactionLogService> _transactionLogServiceMock = new();
     private readonly JournalEntryService _service;
 
     public JournalEntryServiceTests()
     {
-        _service = new JournalEntryService(_repositoryMock.Object);
+        _service = new JournalEntryService(_repositoryMock.Object, _transactionLogServiceMock.Object);
     }
 
     [Fact]

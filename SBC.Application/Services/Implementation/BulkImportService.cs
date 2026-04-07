@@ -3,6 +3,7 @@ using SBC.Application.Models.Accounting;
 using SBC.Application.Services.Interfaces;
 using SBC.Domain.Entities.Accounting;
 using SBC.Domain.Repositories.Interfaces;
+using System.Text.Json;
 
 namespace SBC.Application.Services.Implementation;
 
@@ -12,7 +13,8 @@ namespace SBC.Application.Services.Implementation;
 public class BulkImportService(
     IBulkImportRepository repository,
     IJournalEntryRepository journalEntryRepository,
-    IAccountRepository accountRepository) : IBulkImportService
+    IAccountRepository accountRepository,
+    ITransactionLogService transactionLogService) : IBulkImportService
 {
     public async Task<BulkJournalEntryImportResultDto> ImportFromExcelAsync(Stream excelStream, string fileName)
     {
@@ -22,8 +24,10 @@ public class BulkImportService(
 
         if (worksheet == null)
         {
-            result.Errors.Add("El archivo Excel no contiene ninguna hoja.");
+            var error = "El archivo Excel no contiene ninguna hoja.";
+            result.Errors.Add(error);
             result.ErrorCount = 1;
+            await transactionLogService.LogTransactionAsync(null, "BulkImport", "BulkImport", null, "ValidationError", JsonSerializer.Serialize(new { fileName }), error);
             return result;
         }
 
@@ -141,6 +145,11 @@ public class BulkImportService(
             TotalCount = attemptedEntriesCount
         };
         await repository.AddAsync(bulkImport);
+
+        var status = result.ErrorCount == 0 ? "Success" : (result.SuccessCount > 0 ? "PartialSuccess" : "Failure");
+        var details = JsonSerializer.Serialize(new { fileName, result.SuccessCount, result.ErrorCount, TotalCount = attemptedEntriesCount });
+        var errorMessage = result.ErrorCount > 0 ? string.Join("; ", result.Errors.Take(5)) : null;
+        await transactionLogService.LogTransactionAsync(null, "BulkImport", "BulkImport", bulkImport.Id.ToString(), status, details, errorMessage);
 
         return result;
     }
