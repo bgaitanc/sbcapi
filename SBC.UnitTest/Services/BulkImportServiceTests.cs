@@ -46,4 +46,15 @@ public class BulkImportServiceTests
         Assert.Equal(2, result.Count());
         Assert.Equal("test1.xlsx", result.First().FileName);
     }
+
+    [Fact]
+    public async Task GenerateBulkImportTemplateAsync_ShouldReturnByteArray()
+    {
+        // Act
+        var result = await _service.GenerateBulkImportTemplateAsync();
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.True(result.Length > 0);
+    }
 }

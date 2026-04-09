@@ -204,6 +204,54 @@ public class BulkImportService(
         };
     }
 
+    public async Task<byte[]> GenerateBulkImportTemplateAsync()
+    {
+        using var workbook = new XLWorkbook();
+        var worksheet = workbook.Worksheets.Add("Plantilla Carga Masiva");
+
+        // Encabezados
+        worksheet.Cell(1, 1).Value = "Fecha";
+        worksheet.Cell(1, 2).Value = "Descripción";
+        worksheet.Cell(1, 3).Value = "Código de Cuenta";
+        worksheet.Cell(1, 4).Value = "Debe";
+        worksheet.Cell(1, 5).Value = "Haber";
+        worksheet.Cell(1, 6).Value = "Referencia de Grupo (Opcional)";
+
+        // Estilo encabezados
+        var headerRange = worksheet.Range(1, 1, 1, 6);
+        headerRange.Style.Font.Bold = true;
+        headerRange.Style.Fill.BackgroundColor = XLColor.LightGray;
+
+        // Datos de prueba
+        var today = DateTime.Today;
+        var testData = new[]
+        {
+            new { Date = today, Desc = "Apertura de caja inicial", Account = "1.1.1.1.001", Debit = 5000m, Credit = 0m, Group = "AS-001" },
+            new { Date = today, Desc = "Apertura de caja inicial", Account = "3.1.1.1.001", Debit = 0m, Credit = 5000m, Group = "AS-001" },
+            new { Date = today, Desc = "Pago de servicios de energía", Account = "6.1.4.2.01", Debit = 150m, Credit = 0m, Group = "AS-002" },
+            new { Date = today, Desc = "Pago de servicios de energía", Account = "1.1.1.2.001", Debit = 0m, Credit = 150m, Group = "AS-002" }
+        };
+
+        for (int i = 0; i < testData.Length; i++)
+        {
+            worksheet.Cell(i + 2, 1).Value = testData[i].Date;
+            worksheet.Cell(i + 2, 2).Value = testData[i].Desc;
+            worksheet.Cell(i + 2, 3).Value = testData[i].Account;
+            worksheet.Cell(i + 2, 4).Value = testData[i].Debit;
+            worksheet.Cell(i + 2, 5).Value = testData[i].Credit;
+            worksheet.Cell(i + 2, 6).Value = testData[i].Group;
+        }
+
+        worksheet.Columns().AdjustToContents();
+
+        using var stream = new MemoryStream();
+        workbook.SaveAs(stream);
+
+        await transactionLogService.LogTransactionAsync(null, TransactionActions.GetBulkImportTemplate, nameof(BulkImport), null, TransactionStatus.Success, "Generación de plantilla de prueba exitosa.");
+
+        return stream.ToArray();
+    }
+
     private async Task<string> GenerateCodeAsync(int year, int month, List<JournalEntry> currentList)
     {
         var lastCode = await journalEntryRepository.GetLastCodeAsync(year, month);

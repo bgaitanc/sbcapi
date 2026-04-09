@@ -186,6 +186,12 @@ Authorization: Bearer {{auth_token}}
 
 ###
 
+# @name api/bulkImports/getTemplate
+GET {{SBC_HostAddress}}/api/bulkImports/template
+Authorization: Bearer {{auth_token}}
+
+###
+
 # @name api/journalEntryLines/getPaged
 GET {{SBC_HostAddress}}/api/journalEntryLines?pageNumber=1&pageSize=10&accountId=00000000-0000-0000-0000-000000000000
 Authorization: Bearer {{auth_token}}

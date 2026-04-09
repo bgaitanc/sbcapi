@@ -28,6 +28,7 @@ public static class TransactionActions
     public const string GetAccountingPeriods = "GetAccountingPeriods";
     public const string GetJournalEntryLines = "GetJournalEntryLines";
     public const string GetBulkImports = "GetBulkImports";
+    public const string GetBulkImportTemplate = "GetBulkImportTemplate";
 
     public const string GenerateIncomeStatement = "GenerateIncomeStatement";
     public const string GenerateBalanceSheet = "GenerateBalanceSheet";

@@ -44,4 +44,16 @@ public class BulkImportsController(IBulkImportService service) : SbcControllerBa
         using var stream = file.OpenReadStream();
         return await ExecuteServiceAsync(() => service.ImportFromExcelAsync(stream, file.FileName));
     }
+
+    /// <summary>
+    /// Generates an Excel template with test data for bulk loading.
+    /// </summary>
+    /// <returns>An Excel file containing the template.</returns>
+    [HttpGet("template")]
+    [ProducesResponseType(typeof(FileResult), (int)HttpStatusCode.OK)]
+    public async Task<IActionResult> GetTemplate()
+    {
+        var content = await service.GenerateBulkImportTemplateAsync();
+        return File(content, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "PlantillaCargaMasiva.xlsx");
+    }
 }
