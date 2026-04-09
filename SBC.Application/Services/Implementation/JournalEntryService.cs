@@ -114,17 +114,49 @@ public class JournalEntryService(
         entry.Description = updateDto.Description;
 
         // Actualizar líneas
-        entry.Lines.Clear();
+        var existingLines = entry.Lines.ToList();
+        foreach (var existingLine in existingLines)
+        {
+            if (updateDto.Lines.All(l => l.Id != existingLine.Id))
+            {
+                entry.Lines.Remove(existingLine);
+            }
+        }
+
         foreach (var lineDto in updateDto.Lines)
         {
-            entry.Lines.Add(new JournalEntryLine
+            if (lineDto.Id.HasValue && lineDto.Id.Value != Guid.Empty)
             {
-                Id = Guid.NewGuid(),
-                JournalEntryId = id,
-                AccountId = lineDto.AccountId,
-                Debit = lineDto.Debit,
-                Credit = lineDto.Credit
-            });
+                var existingLine = entry.Lines.FirstOrDefault(l => l.Id == lineDto.Id.Value);
+                if (existingLine != null)
+                {
+                    existingLine.AccountId = lineDto.AccountId;
+                    existingLine.Debit = lineDto.Debit;
+                    existingLine.Credit = lineDto.Credit;
+                }
+                else
+                {
+                    entry.Lines.Add(new JournalEntryLine
+                    {
+                        Id = lineDto.Id.Value,
+                        JournalEntryId = id,
+                        AccountId = lineDto.AccountId,
+                        Debit = lineDto.Debit,
+                        Credit = lineDto.Credit
+                    });
+                }
+            }
+            else
+            {
+                entry.Lines.Add(new JournalEntryLine
+                {
+                    Id = Guid.NewGuid(),
+                    JournalEntryId = id,
+                    AccountId = lineDto.AccountId,
+                    Debit = lineDto.Debit,
+                    Credit = lineDto.Credit
+                });
+            }
         }
 
         if (!entry.ValidateDoubleEntry())

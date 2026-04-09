@@ -16,7 +16,7 @@ public class JournalEntryLineConfiguration : IEntityTypeConfiguration<JournalEnt
         builder.Property(x => x.Credit).IsRequired().HasColumnType("money");
 
         builder.HasOne(x => x.JournalEntry).WithMany(x => x.Lines).HasForeignKey(x => x.JournalEntryId)
-            .OnDelete(DeleteBehavior.Restrict);
+            .OnDelete(DeleteBehavior.Cascade);
         builder.HasOne(x => x.Account).WithMany().HasForeignKey(x => x.AccountId).OnDelete(DeleteBehavior.Restrict);
         builder.HasIndex(x => x.AccountId);
         builder.HasIndex(x => x.Debit);

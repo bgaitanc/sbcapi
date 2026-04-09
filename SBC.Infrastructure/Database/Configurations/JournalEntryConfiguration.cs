@@ -24,7 +24,7 @@ public class JournalEntryConfiguration : IEntityTypeConfiguration<JournalEntry>
         builder.Property(x => x.IsPosted).IsRequired().HasDefaultValue(false).HasColumnType("bit");
 
         builder.HasMany(x => x.Lines).WithOne(x => x.JournalEntry).HasForeignKey(x => x.JournalEntryId)
-            .OnDelete(DeleteBehavior.Restrict);
+            .OnDelete(DeleteBehavior.Cascade);
 
         builder.ToTable(t =>
         {
