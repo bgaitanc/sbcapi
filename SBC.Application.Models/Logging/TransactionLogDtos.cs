@@ -7,6 +7,7 @@ public class TransactionLogDto
 {
     public Guid Id { get; set; }
     public Guid? UserId { get; set; }
+    public string? UserEmail { get; set; }
     public string Action { get; set; } = string.Empty;
     public string? EntityName { get; set; }
     public string? EntityId { get; set; }

@@ -8,7 +8,7 @@ namespace SBC.Infrastructure.Repositories.Implementation;
 
 public class TransactionLogRepository(SbcDbContext context) : BaseRepository<TransactionLog>(context), ITransactionLogRepository
 {
-    public async Task<(IEnumerable<TransactionLog> Items, int TotalCount)> GetPagedAsync(
+    public async Task<(IEnumerable<(TransactionLog Log, string? Email)> Items, int TotalCount)> GetPagedAsync(
         string? action,
         string? entityName,
         TransactionStatus? status,
@@ -36,12 +36,15 @@ public class TransactionLogRepository(SbcDbContext context) : BaseRepository<Tra
 
         var totalCount = await query.CountAsync();
 
-        var items = await query
-            .OrderByDescending(x => x.LogDate)
+        var items = await (from log in query
+                          join user in context.Users on log.UserId equals user.Id into userJoin
+                          from user in userJoin.DefaultIfEmpty()
+                          select new { Log = log, Email = user != null ? user.Email : null })
+            .OrderByDescending(x => x.Log.LogDate)
             .Skip((pageNumber - 1) * pageSize)
             .Take(pageSize)
             .ToListAsync();
 
-        return (items, totalCount);
+        return (items.Select(x => (x.Log, x.Email)), totalCount);
     }
 }

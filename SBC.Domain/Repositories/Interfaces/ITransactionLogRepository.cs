@@ -5,7 +5,7 @@ namespace SBC.Domain.Repositories.Interfaces;
 
 public interface ITransactionLogRepository : IBaseRepository<TransactionLog>
 {
-    Task<(IEnumerable<TransactionLog> Items, int TotalCount)> GetPagedAsync(
+    Task<(IEnumerable<(TransactionLog Log, string? Email)> Items, int TotalCount)> GetPagedAsync(
         string? action,
         string? entityName,
         TransactionStatus? status,

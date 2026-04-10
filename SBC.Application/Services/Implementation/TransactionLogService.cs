@@ -63,19 +63,20 @@ public class TransactionLogService(
 
         return new PagedResultDto<TransactionLogDto>
         {
-            Items = items.Select(MapToDto),
+            Items = items.Select(x => MapToDto(x.Log, x.Email)),
             TotalCount = totalCount,
             PageNumber = filter.PageNumber,
             PageSize = filter.PageSize
         };
     }
 
-    private static TransactionLogDto MapToDto(TransactionLog log)
+    private static TransactionLogDto MapToDto(TransactionLog log, string? email)
     {
         return new TransactionLogDto
         {
             Id = log.Id,
             UserId = log.UserId,
+            UserEmail = email,
             Action = log.Action,
             EntityName = log.EntityName,
             EntityId = log.EntityId,
