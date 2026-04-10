@@ -308,3 +308,59 @@ Authorization: Bearer {{auth_token}}
 # @name api/transactionLogs/getLogsFiltered
 GET {{SBC_HostAddress}}/api/transactionLogs?action=Login&status=Success&pageNumber=1&pageSize=10
 Authorization: Bearer {{auth_token}}
+
+###
+
+# @name api/users/getAllPaged
+GET {{SBC_HostAddress}}/api/users?pageNumber=1&pageSize=10
+Authorization: Bearer {{auth_token}}
+
+###
+
+# @name api/users/getAllFiltered
+GET {{SBC_HostAddress}}/api/users?userName=admin&email=test.com&pageNumber=1&pageSize=10
+Authorization: Bearer {{auth_token}}
+
+###
+
+# @name api/users/create
+POST {{SBC_HostAddress}}/api/users
+Authorization: Bearer {{auth_token}}
+Content-Type: application/json
+
+{
+  "userName": "admin2",
+  "email": "admin2@test.com",
+  "password": "Password123!",
+  "firstName": "Admin",
+  "lastName": "User",
+  "roles": ["Admin"]
+}
+
+###
+
+# @name api/users/update
+@userId = 00000000-0000-0000-0000-000000000000
+PUT {{SBC_HostAddress}}/api/users/{{userId}}
+Authorization: Bearer {{auth_token}}
+Content-Type: application/json
+
+{
+  "userName": "admin2_updated",
+  "email": "admin2_updated@test.com",
+  "firstName": "Admin Updated",
+  "lastName": "User Updated",
+  "roles": ["Admin", "Manager"]
+}
+
+###
+
+# @name api/users/updatePassword
+PUT {{SBC_HostAddress}}/api/users/{{userId}}/password
+Authorization: Bearer {{auth_token}}
+Content-Type: application/json
+
+{
+  "currentPassword": "Password123!",
+  "newPassword": "NewPassword123!"
+}

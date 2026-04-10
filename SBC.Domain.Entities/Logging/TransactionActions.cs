@@ -29,6 +29,9 @@ public static class TransactionActions
     public const string GetJournalEntryLines = "GetJournalEntryLines";
     public const string GetBulkImports = "GetBulkImports";
     public const string GetBulkImportTemplate = "GetBulkImportTemplate";
+    public const string CreateUser = "CreateUser";
+    public const string UpdateUser = "UpdateUser";
+    public const string UpdatePassword = "UpdatePassword";
 
     public const string GenerateIncomeStatement = "GenerateIncomeStatement";
     public const string GenerateBalanceSheet = "GenerateBalanceSheet";
