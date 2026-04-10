@@ -41,7 +41,7 @@ public class AccountingPeriodServiceTests
         _accountRepoMock.Setup(r => r.GetByIdAsync(equityAccountId)).ReturnsAsync(new Account { Id = equityAccountId, Type = AccountType.Equity });
         
         var unpostedEntry = new JournalEntry { Date = new DateTime(2026, 1, 15), IsPosted = false };
-        _journalRepoMock.Setup(r => r.GetByDateRangeWithLinesAsync(startDate, endDate))
+        _journalRepoMock.Setup(r => r.GetByDateRangeWithLinesAsync(startDate, endDate, true))
             .ReturnsAsync(new List<JournalEntry> { unpostedEntry });
 
         var incomeStatement = new IncomeStatementDto

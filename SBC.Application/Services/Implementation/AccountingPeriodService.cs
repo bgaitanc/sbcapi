@@ -39,7 +39,7 @@ public class AccountingPeriodService(
         // 3. Obtener todos los asientos del periodo para mayorizarlos
         var startDate = new DateTime(year, month, 1);
         var endDate = startDate.AddMonths(1).AddDays(-1);
-        var entries = await journalEntryRepository.GetByDateRangeWithLinesAsync(startDate, endDate);
+        var entries = await journalEntryRepository.GetByDateRangeWithLinesAsync(startDate, endDate, true);
         
         // Mayorización (marcar como IsPosted)
         foreach (var entry in entries.Where(e => !e.IsPosted))
