@@ -141,4 +141,82 @@ public class FinancialReportServiceTests
         Assert.Equal("Caja", result.Assets[0].AccountName);
         Assert.Equal(7500, result.Assets[0].Amount);
     }
+
+    [Fact]
+    public async Task GenerateIncomeStatementExcelAsync_ShouldReturnByteArray()
+    {
+        // Arrange
+        var mockRepo = new Mock<IJournalEntryRepository>();
+        var startDate = new DateTime(2026, 1, 1);
+        var endDate = new DateTime(2026, 1, 31);
+        mockRepo.Setup(r => r.GetByDateRangeWithLinesAsync(startDate, endDate, false))
+            .ReturnsAsync(new List<JournalEntry>());
+
+        var service = new FinancialReportService(mockRepo.Object, _transactionLogServiceMock.Object);
+
+        // Act
+        var result = await service.GenerateIncomeStatementExcelAsync(startDate, endDate);
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.NotEmpty(result);
+    }
+
+    [Fact]
+    public async Task GenerateIncomeStatementPdfAsync_ShouldReturnByteArray()
+    {
+        // Arrange
+        var mockRepo = new Mock<IJournalEntryRepository>();
+        var startDate = new DateTime(2026, 1, 1);
+        var endDate = new DateTime(2026, 1, 31);
+        mockRepo.Setup(r => r.GetByDateRangeWithLinesAsync(startDate, endDate, false))
+            .ReturnsAsync(new List<JournalEntry>());
+
+        var service = new FinancialReportService(mockRepo.Object, _transactionLogServiceMock.Object);
+
+        // Act
+        var result = await service.GenerateIncomeStatementPdfAsync(startDate, endDate);
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.NotEmpty(result);
+    }
+
+    [Fact]
+    public async Task GenerateBalanceSheetExcelAsync_ShouldReturnByteArray()
+    {
+        // Arrange
+        var mockRepo = new Mock<IJournalEntryRepository>();
+        var date = new DateTime(2026, 12, 31);
+        mockRepo.Setup(r => r.GetByDateRangeWithLinesAsync(DateTime.MinValue, date, false))
+            .ReturnsAsync(new List<JournalEntry>());
+
+        var service = new FinancialReportService(mockRepo.Object, _transactionLogServiceMock.Object);
+
+        // Act
+        var result = await service.GenerateBalanceSheetExcelAsync(date);
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.NotEmpty(result);
+    }
+
+    [Fact]
+    public async Task GenerateBalanceSheetPdfAsync_ShouldReturnByteArray()
+    {
+        // Arrange
+        var mockRepo = new Mock<IJournalEntryRepository>();
+        var date = new DateTime(2026, 12, 31);
+        mockRepo.Setup(r => r.GetByDateRangeWithLinesAsync(DateTime.MinValue, date, false))
+            .ReturnsAsync(new List<JournalEntry>());
+
+        var service = new FinancialReportService(mockRepo.Object, _transactionLogServiceMock.Object);
+
+        // Act
+        var result = await service.GenerateBalanceSheetPdfAsync(date);
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.NotEmpty(result);
+    }
 }
