@@ -1999,7 +1999,7 @@ namespace SBC.Infrastructure.Migrations
                     b.HasOne("SBC.Domain.Entities.Accounting.JournalEntry", "JournalEntry")
                         .WithMany("Lines")
                         .HasForeignKey("JournalEntryId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Account");
