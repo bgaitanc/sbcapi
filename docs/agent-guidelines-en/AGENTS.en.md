@@ -203,3 +203,11 @@ Consult the relevant specialized skill when a task involves any of these workflo
 | `sbc-ef-migration` | [.agents/skills/sbc-ef-migration/SKILL.md](.agents/skills/sbc-ef-migration/SKILL.md) | Modifying entities, Fluent API configurations, seeders, or generating EF Core migrations |
 | `sbc-accounting-operations` | [.agents/skills/sbc-accounting-operations/SKILL.md](.agents/skills/sbc-accounting-operations/SKILL.md) | Working on journal entries, lines, accounts, period closing, Excel bulk import, or JSON/Excel/PDF financial reports |
 | `sbc-unit-testing` | [.agents/skills/sbc-unit-testing/SKILL.md](.agents/skills/sbc-unit-testing/SKILL.md) | Writing, updating, or debugging unit tests in `SBC.UnitTest` |
+
+---
+
+## 13. Technical Debt (`docs/TECHNICAL_DEBT.md`)
+
+- The repository maintains a backlog of known pending items in [docs/TECHNICAL_DEBT.md](docs/TECHNICAL_DEBT.md) *(single source of truth in Spanish)*.
+- **NOT a knowledge base**: Do not read it by default on unrelated tasks and never imitate the limitations or patterns recorded there; they are known issues queued for future remediation.
+- Consult it only when explicitly asked to address technical debt, or update it when resolving a tracked item (updating its status and removing any related temporary caveat in this file) or when logging newly discovered out-of-scope technical debt.

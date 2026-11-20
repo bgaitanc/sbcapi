@@ -203,3 +203,11 @@ Consulta la skill especializada correspondiente cuando la tarea involucre alguno
 | `sbc-ef-migration` | [.agents/skills/sbc-ef-migration/SKILL.md](.agents/skills/sbc-ef-migration/SKILL.md) | Modificar entidades, configuraciones Fluent API, seeders o generar migraciones EF Core |
 | `sbc-accounting-operations` | [.agents/skills/sbc-accounting-operations/SKILL.md](.agents/skills/sbc-accounting-operations/SKILL.md) | Trabajar con asientos, líneas, cuentas, cierres de período, carga masiva Excel o reportes JSON/Excel/PDF |
 | `sbc-unit-testing` | [.agents/skills/sbc-unit-testing/SKILL.md](.agents/skills/sbc-unit-testing/SKILL.md) | Escribir, actualizar o depurar pruebas unitarias en `SBC.UnitTest` |
+
+---
+
+## 13. Deuda Técnica (`docs/TECHNICAL_DEBT.md`)
+
+- El repositorio mantiene un registro de temas pendientes en [docs/TECHNICAL_DEBT.md](docs/TECHNICAL_DEBT.md).
+- **NO es base de conocimiento**: No lo leas por defecto en tareas no relacionadas ni imites los patrones o limitaciones allí descritos; son problemas conocidos pendientes de remediación.
+- Consúltalo únicamente cuando el usuario solicite atender deuda técnica, o actualízalo si resuelves un ítem listado (cambiando su estado y limpiando cualquier nota temporal relacionada en este archivo) o si detectas deuda técnica nueva fuera del alcance de la tarea actual.
